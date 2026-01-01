@@ -1,0 +1,74 @@
+// src/data/categories.ts
+
+export const CATEGORIES = [
+  {
+    id: "1",
+    name: "Ropa",
+    slug: "ropa",
+    color: "bg-rose-500/10 text-rose-700",
+    icon: "👕",
+  },
+  {
+    id: "2",
+    name: "Zapatos",
+    slug: "zapatos",
+    color: "bg-blue-500/10 text-blue-700",
+    icon: "👟",
+  },
+  {
+    id: "3",
+    name: "Cosméticos",
+    slug: "cosmeticos",
+    color: "bg-purple-500/10 text-purple-700",
+    icon: "💄",
+  },
+  {
+    id: "4",
+    name: "Laptop",
+    slug: "laptop",
+    color: "bg-emerald-500/10 text-emerald-700",
+    icon: "💻",
+  },
+  {
+    id: "5",
+    name: "Celulares",
+    slug: "celulares",
+    color: "bg-amber-500/10 text-amber-700",
+    icon: "📱",
+  },
+  {
+    id: "6",
+    name: "Electrodomésticos",
+    slug: "electrodomesticos",
+    color: "bg-amber-500/10 text-amber-700",
+    icon: "📺",
+  },
+  {
+    id: "7",
+    name: "Motos",
+    slug: "motos",
+    color: "bg-amber-500/10 text-amber-700",
+    icon: "🛵",
+  },
+  {
+    id: "8",
+    name: "Triciclos",
+    slug: "triciclos",
+    color: "bg-amber-500/10 text-amber-700",
+    icon: "🛵",
+  },
+  {
+    id: "9",
+    name: "Computadoras",
+    slug: "computadoras",
+    color: "bg-amber-500/10 text-amber-700",
+    icon: "🖥️",
+  },
+  {
+    id: "10",
+    name: "Servicios",
+    slug: "servicios",
+    color: "bg-amber-500/10 text-amber-700",
+    icon: "💵",
+  },
+] as const; // 👈 'as const' para preservar tipos si usas TS estricto
