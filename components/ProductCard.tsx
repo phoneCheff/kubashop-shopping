@@ -1,5 +1,4 @@
 // components/ProductCard.tsx
-
 "use client";
 
 import { useCart } from "@/components/CartProvider";
@@ -9,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Plus, Search, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import NoImagePlaceholder from "./NoImagePlaceholder"; // Ajusta la ruta si es necesario
 
 type ProductCardProps = {
   product: {
@@ -31,20 +31,22 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-  const imageUrl =
-    product.images[0] ||
-    "https://res.cloudinary.com/dloy6thsv/image/upload/v1763573811/appleID_idxspf.avif";
+  // ✅ Solo usamos la primera imagen o null si no existe
+  const imageUrl = product.images[0] || null;
 
-  const optimizedImageUrl = imageUrl.includes("cloudinary.com")
-    ? imageUrl.replace(
-        "/upload/",
-        "/upload/w_350,c_limit,q_auto:low,f_auto,dpr_auto/"
-      )
-    : imageUrl;
+  // Optimizamos solo si hay URL y es de Cloudinary
+  const optimizedImageUrl =
+    imageUrl && imageUrl.includes("cloudinary.com")
+      ? imageUrl.replace(
+          "/upload/",
+          "/upload/w_350,c_limit,q_auto:low,f_auto,dpr_auto/"
+        )
+      : imageUrl;
 
-  const fullSizeImageUrl = imageUrl.includes("cloudinary.com")
-    ? imageUrl.replace("/upload/", "/upload/w_1200,q_auto,f_auto/")
-    : imageUrl;
+  const fullSizeImageUrl =
+    imageUrl && imageUrl.includes("cloudinary.com")
+      ? imageUrl.replace("/upload/", "/upload/w_1200,q_auto,f_auto/")
+      : imageUrl;
 
   // Función para resetear el estado después de agregar al carrito
   const resetAddedState = () => {
@@ -52,23 +54,18 @@ export function ProductCard({ product }: ProductCardProps) {
     setIsLoading(false);
   };
 
-  // Effect para limpiar el timeout
+  // Limpiar timeout al desmontar o cambiar isAdded
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
-
     if (isAdded) {
       timer = setTimeout(() => {
         resetAddedState();
       }, 700);
     }
-
-    // Limpieza del timeout
     return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
+      if (timer) clearTimeout(timer);
     };
-  }, [isAdded]); // Solo se ejecuta cuando isAdded cambia
+  }, [isAdded]);
 
   const handleAddToCart = () => {
     setIsLoading(true);
@@ -78,48 +75,53 @@ export function ProductCard({ product }: ProductCardProps) {
       price: product.price,
       coin: product.coin,
       priceWithMargin: product.priceWithMargin,
-      image: optimizedImageUrl,
+      image: imageUrl, // Puede ser null → CartProvider lo acepta
       clientPhone: product.client_phone || "",
     });
-
     setIsAdded(true);
-    // El timeout se maneja en el useEffect
   };
 
   return (
     <>
       <Card className="product-card bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 mb-2">
-        {/* Contenedor de imagen con lupa */}
-        <div className="relative w-full pt-[100%] bg-gray-100">
-          <Image
-            src={optimizedImageUrl}
-            alt={product.name}
-            fill
-            className="object-cover cursor-pointer"
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-            priority={false}
-            placeholder="blur"
-            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhESMIAAAAABJRU5ErkJggg=="
-            unoptimized
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "https://res.cloudinary.com/dloy6thsv/image/upload/v1763573811/appleID_idxspf.avif";
-            }}
-            onClick={() => setIsImageModalOpen(true)}
-          />
-
-          {/* Ícono de lupa */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsImageModalOpen(true);
-            }}
-            className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Ampliar imagen"
-          >
-            <Search className="h-6 w-6 text-gray-700" />
-          </button>
+        {/* Contenedor de imagen con relación de aspecto 1:1 (pt-[100%]) */}
+        <div className="relative w-full pt-[100%]">
+          {imageUrl ? (
+            <>
+              <Image
+                src={optimizedImageUrl}
+                alt={product.name}
+                fill
+                className="object-cover cursor-pointer"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhESMIAAAAABJRU5ErkJggg=="
+                unoptimized
+                onError={(e) => {
+                  // Opcional: ocultar imagen rota (el fondo gris del contenedor se verá)
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+                onClick={() => setIsImageModalOpen(true)}
+              />
+              {/* Botón de lupa */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsImageModalOpen(true);
+                }}
+                className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors"
+                aria-label="Ampliar imagen"
+              >
+                <Search className="h-6 w-6 text-gray-700" />
+              </button>
+            </>
+          ) : (
+            // ✅ Mostrar placeholder si no hay imagen
+            <div className="absolute inset-0">
+              <NoImagePlaceholder />
+            </div>
+          )}
         </div>
 
         <div className="p-3">
@@ -138,7 +140,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </span>
             )}
           </div>
-          <p className="text-xm  text-gray-700 px-2 py-0.5 mb-2">
+          <p className="text-xs text-gray-700 px-2 py-0.5 mb-2">
             {product.description}
           </p>
 
@@ -168,9 +170,9 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </Card>
 
-      {/* Modal de imagen ampliada */}
+      {/* Modal de imagen ampliada: solo si hay imagen */}
       <AnimatePresence>
-        {isImageModalOpen && (
+        {isImageModalOpen && imageUrl && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -199,7 +201,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 width={600}
                 height={600}
                 className="max-h-[90vh] w-auto object-contain rounded-lg shadow-2xl"
-                priority={true}
+                priority
                 unoptimized
               />
             </motion.div>

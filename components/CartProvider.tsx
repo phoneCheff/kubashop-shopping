@@ -9,7 +9,7 @@ type CartItem = {
   price: number;
   coin: string;
   priceWithMargin: number;
-  image: string;
+  image: string | null;
   quantity: number;
   clientPhone: string;
 };
@@ -74,9 +74,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         {
           ...product,
           quantity: 1,
-          image:
-            product.image ||
-            "https://res.cloudinary.com/dloy6thsv/image/upload/v1763573811/appleID_idxspf.avif",
+          image: product.image || null,
         },
       ];
     });

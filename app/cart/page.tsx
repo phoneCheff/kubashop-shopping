@@ -1,8 +1,8 @@
 // app/cart/page.tsx
-
 "use client";
 
 import { useCart } from "@/components/CartProvider";
+import NoImagePlaceholder from "@/components/NoImagePlaceholder"; // Ajusta la ruta si es necesario
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, Smartphone, Trash2 } from "lucide-react";
@@ -21,7 +21,7 @@ export default function CartPage() {
 
   // 🧮 Agrupar por moneda (item.coin)
   const groupedByCoin = items.reduce((acc, item) => {
-    const coin = item.coin || "USD"; // fallback seguro
+    const coin = item.coin || "USD";
     if (!acc[coin]) {
       acc[coin] = { items: [], subtotal: 0 };
     }
@@ -126,18 +126,23 @@ export default function CartPage() {
                     className="flex gap-3 pb-3 border-b border-gray-100 last:border-b-0 last:pb-0"
                   >
                     <div className="relative w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={50}
-                        height={50}
-                        unoptimized
-                        className="object-cover w-full h-full"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "https://res.cloudinary.com/dloy6thsv/image/upload/v1763573811/appleID_idxspf.avif";
-                        }}
-                      />
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          width={50}
+                          height={50}
+                          unoptimized
+                          className="object-cover w-full h-full"
+                          // Opcional: manejar error si quieres ocultar la imagen rota
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                      ) : (
+                        <NoImagePlaceholder />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 text-sm line-clamp-2 uppercase mt-2">
