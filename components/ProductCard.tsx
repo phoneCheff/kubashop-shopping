@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Plus, Search, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import NoImagePlaceholder from "./NoImagePlaceholder"; // Ajusta la ruta si es necesario
+import NoImagePlaceholder from "./NoImagePlaceholder";
 
 type ProductCardProps = {
   product: {
@@ -31,30 +31,29 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-  // ✅ Solo usamos la primera imagen o null si no existe
   const imageUrl = product.images[0] || null;
 
-  // Optimizamos solo si hay URL y es de Cloudinary
-  const optimizedImageUrl =
-    imageUrl && imageUrl.includes("cloudinary.com")
-      ? imageUrl.replace(
+  // ✅ Función para optimizar URLs (solo llamada cuando imageUrl existe)
+  const getOptimizedUrl = (url: string) => {
+    return url.includes("cloudinary.com")
+      ? url.replace(
           "/upload/",
           "/upload/w_350,c_limit,q_auto:low,f_auto,dpr_auto/"
         )
-      : imageUrl;
+      : url;
+  };
 
-  const fullSizeImageUrl =
-    imageUrl && imageUrl.includes("cloudinary.com")
-      ? imageUrl.replace("/upload/", "/upload/w_1200,q_auto,f_auto/")
-      : imageUrl;
+  const getFullSizeUrl = (url: string) => {
+    return url.includes("cloudinary.com")
+      ? url.replace("/upload/", "/upload/w_1200,q_auto,f_auto/")
+      : url;
+  };
 
-  // Función para resetear el estado después de agregar al carrito
   const resetAddedState = () => {
     setIsAdded(false);
     setIsLoading(false);
   };
 
-  // Limpiar timeout al desmontar o cambiar isAdded
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
     if (isAdded) {
@@ -75,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
       price: product.price,
       coin: product.coin,
       priceWithMargin: product.priceWithMargin,
-      image: imageUrl, // Puede ser null → CartProvider lo acepta
+      image: imageUrl,
       clientPhone: product.client_phone || "",
     });
     setIsAdded(true);
@@ -84,12 +83,11 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <Card className="product-card bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 mb-2">
-        {/* Contenedor de imagen con relación de aspecto 1:1 (pt-[100%]) */}
         <div className="relative w-full pt-[100%]">
           {imageUrl ? (
             <>
               <Image
-                src={optimizedImageUrl}
+                src={getOptimizedUrl(imageUrl)} // ✅ Ahora es string seguro
                 alt={product.name}
                 fill
                 className="object-cover cursor-pointer"
@@ -98,12 +96,10 @@ export function ProductCard({ product }: ProductCardProps) {
                 blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhESMIAAAAABJRU5ErkJggg=="
                 unoptimized
                 onError={(e) => {
-                  // Opcional: ocultar imagen rota (el fondo gris del contenedor se verá)
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
                 onClick={() => setIsImageModalOpen(true)}
               />
-              {/* Botón de lupa */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -117,7 +113,6 @@ export function ProductCard({ product }: ProductCardProps) {
               </button>
             </>
           ) : (
-            // ✅ Mostrar placeholder si no hay imagen
             <div className="absolute inset-0">
               <NoImagePlaceholder />
             </div>
@@ -170,7 +165,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </Card>
 
-      {/* Modal de imagen ampliada: solo si hay imagen */}
+      {/* Modal de imagen ampliada */}
       <AnimatePresence>
         {isImageModalOpen && imageUrl && (
           <motion.div
@@ -196,7 +191,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <X className="h-6 w-6" />
               </button>
               <Image
-                src={fullSizeImageUrl}
+                src={getFullSizeUrl(imageUrl)} // ✅ También es string seguro
                 alt={product.name}
                 width={600}
                 height={600}

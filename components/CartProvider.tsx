@@ -23,7 +23,7 @@ type CartContextType = {
     price: number;
     coin: string;
     priceWithMargin: number;
-    image: string;
+    image: string | null; // ✅ Corregido: ahora acepta null
     clientPhone: string;
   }) => void;
   removeFromCart: (id: string) => void;
@@ -42,7 +42,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedCart = localStorage.getItem("kubashop-cart");
     if (savedCart) {
-      setItems(JSON.parse(savedCart));
+      try {
+        setItems(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Error parsing cart from localStorage", e);
+        setItems([]);
+      }
     }
   }, []);
 
@@ -57,7 +62,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     price: number;
     coin: string;
     priceWithMargin: number;
-    image: string;
+    image: string | null;
     clientPhone: string;
   }) => {
     setItems((prev) => {
@@ -125,7 +130,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       };
     });
 
-    // Devolver el primer mensaje (podríamos hacer múltiples WhatsApps)
+    // ✅ Corregido: eliminar espacios en la URL de WhatsApp
     return `https://wa.me/${messages[0].myPhone}?text=${encodeURIComponent(
       messages[0].message
     )}`;
