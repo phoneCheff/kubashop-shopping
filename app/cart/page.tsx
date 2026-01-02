@@ -132,7 +132,6 @@ export default function CartPage() {
                           alt={item.name}
                           width={50}
                           height={50}
-                          unoptimized
                           className="object-cover w-full h-full"
                           // Opcional: manejar error si quieres ocultar la imagen rota
                           onError={(e) => {
