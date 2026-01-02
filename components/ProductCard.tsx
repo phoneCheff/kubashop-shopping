@@ -35,18 +35,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   // ✅ Función para optimizar URLs (solo llamada cuando imageUrl existe)
   const getOptimizedUrl = (url: string) => {
-    return url.includes("cloudinary.com")
-      ? url.replace(
-          "/upload/",
-          "/upload/w_350,c_limit,q_auto:low,f_auto,dpr_auto/"
-        )
-      : url;
+    return url.includes("cloudinary.com") ? url : url;
   };
 
   const getFullSizeUrl = (url: string) => {
-    return url.includes("cloudinary.com")
-      ? url.replace("/upload/", "/upload/w_1200,q_auto,f_auto/")
-      : url;
+    return url.includes("cloudinary.com") ? url : url;
   };
 
   const resetAddedState = () => {
