@@ -80,14 +80,13 @@ export function ProductCard({ product }: ProductCardProps) {
           {imageUrl ? (
             <>
               <Image
-                src={getOptimizedUrl(imageUrl)} // ✅ Ahora es string seguro
+                src={getOptimizedUrl(imageUrl)}
                 alt={product.name}
                 fill
                 className="object-cover cursor-pointer"
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                 placeholder="blur"
                 blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhESMIAAAAABJRU5ErkJggg=="
-                unoptimized
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
@@ -190,7 +189,6 @@ export function ProductCard({ product }: ProductCardProps) {
                 height={600}
                 className="max-h-[90vh] w-auto object-contain rounded-lg shadow-2xl"
                 priority
-                unoptimized
               />
             </motion.div>
           </motion.div>
