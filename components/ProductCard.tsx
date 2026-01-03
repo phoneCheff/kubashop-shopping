@@ -27,6 +27,7 @@ type ProductCardProps = {
     priceWithMargin: number;
     gender: string | null;
     client_phone: string;
+    custom_slug: string;
     link_images: { links: string[] };
     images: string[];
     attributes: { key: string; value: any }[];
