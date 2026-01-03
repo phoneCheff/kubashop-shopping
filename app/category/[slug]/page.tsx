@@ -27,9 +27,7 @@ type ProductType = {
   gender: string | null;
   client_phone: string;
   custom_slug: string;
-  images: string[];
   link_images: { links: string[] };
-  attributes: { key: string; value: any }[];
 };
 
 export default async function CategoryPage({
@@ -74,16 +72,7 @@ export default async function CategoryPage({
         gender,
         is_active,
         link_images,
-        custom_slug,
-        products_client_lnk (
-          clients ( phone )
-        ),
-        product_images_product_lnk (
-          product_images ( url )
-        ),
-        product_attributes_product_lnk (
-          product_attributes ( key, value )
-        )
+        custom_slug
       )
     `
     )
@@ -117,17 +106,8 @@ export default async function CategoryPage({
         priceWithMargin: product.priceWithMargin,
         coin: product.coin,
         gender: product.gender,
-        client_phone: product.products_client_lnk?.[0]?.clients?.phone ?? "",
         link_images: product.link_images,
         custom_slug: product.custom_slug,
-        images:
-          product.product_images_product_lnk?.map(
-            (i: any) => i.product_images.url
-          ) ?? [],
-        attributes:
-          product.product_attributes_product_lnk?.map(
-            (a: any) => a.product_attributes
-          ) ?? [],
       };
     })
     .filter((p): p is ProductType => p !== null); // 👈 Filtra los nulos y mantiene el tipado

@@ -26,11 +26,8 @@ type ProductCardProps = {
     coin: string;
     priceWithMargin: number;
     gender: string | null;
-    client_phone: string;
     custom_slug: string;
     link_images: { links: string[] };
-    images: string[];
-    attributes: { key: string; value: any }[];
   };
 };
 
@@ -102,7 +99,6 @@ export function ProductCard({ product }: ProductCardProps) {
       priceWithMargin: product.priceWithMargin,
       image: mainImageUrl,
       custom_slug: product.custom_slug,
-      clientPhone: product.client_phone || "",
     });
     setIsAdded(true);
   };

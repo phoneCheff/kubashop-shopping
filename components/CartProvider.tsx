@@ -12,7 +12,6 @@ type CartItem = {
   image: string | null;
   custom_slug: string;
   quantity: number;
-  clientPhone: string;
 };
 
 type CartContextType = {
@@ -26,7 +25,6 @@ type CartContextType = {
     priceWithMargin: number;
     custom_slug: string;
     image: string | null; // ✅ Corregido: ahora acepta null
-    clientPhone: string;
   }) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
@@ -66,7 +64,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     priceWithMargin: number;
     custom_slug: string;
     image: string | null;
-    clientPhone: string;
   }) => {
     setItems((prev) => {
       const existingItem = prev.find((item) => item.id === product.id);
@@ -105,10 +102,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     // Agrupar productos por vendedor (phone)
     const vendors = items.reduce((acc, item) => {
-      if (!acc[item.clientPhone]) {
-        acc[item.clientPhone] = [];
+      if (!acc[item.id]) {
+        acc[item.id] = [];
       }
-      acc[item.clientPhone].push(item);
+      acc[item.id].push(item);
       return acc;
     }, {} as Record<string, CartItem[]>);
 
