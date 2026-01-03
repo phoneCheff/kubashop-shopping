@@ -24,7 +24,6 @@ export default function RootLayout({
     <html lang="es">
       <head>
         {/* Favicon clásico */}
-        <link rel="icon" href="/icon.ico" sizes="any" />
         {/* Favicon SVG (opcional, moderno) */}
         <link rel="icon" href="/icon.svg" type="image/svg+xml" sizes="any" />
         {/* Apple Touch Icon */}

@@ -5,7 +5,14 @@ import { useCart } from "@/components/CartProvider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Plus, Search, X } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import NoImagePlaceholder from "./NoImagePlaceholder";
@@ -20,6 +27,7 @@ type ProductCardProps = {
     priceWithMargin: number;
     gender: string | null;
     client_phone: string;
+    link_images: { links: string[] };
     images: string[];
     attributes: { key: string; value: any }[];
   };
@@ -30,16 +38,40 @@ export function ProductCard({ product }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Nuevo estado para el índice actual
 
-  const imageUrl = product.images[0] || null;
+  // Obtener todas las imágenes del producto
+  const allImages = product.link_images?.links || [];
 
-  // ✅ Función para optimizar URLs (solo llamada cuando imageUrl existe)
+  // URL de la imagen principal (primera imagen)
+  const mainImageUrl = allImages[0] || null;
+
+  // Función para optimizar URLs
   const getOptimizedUrl = (url: string) => {
     return url.includes("cloudinary.com") ? url : url;
   };
 
   const getFullSizeUrl = (url: string) => {
     return url.includes("cloudinary.com") ? url : url;
+  };
+
+  // Función para cambiar de imagen en el carrusel
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === allImages.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? allImages.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Resetear el índice cuando se abre el modal
+  const openImageModal = () => {
+    setCurrentImageIndex(0);
+    setIsImageModalOpen(true);
   };
 
   const resetAddedState = () => {
@@ -67,7 +99,8 @@ export function ProductCard({ product }: ProductCardProps) {
       price: product.price,
       coin: product.coin,
       priceWithMargin: product.priceWithMargin,
-      image: imageUrl,
+      image: mainImageUrl,
+      custom_slug: product.custom_slug,
       clientPhone: product.client_phone || "",
     });
     setIsAdded(true);
@@ -77,10 +110,10 @@ export function ProductCard({ product }: ProductCardProps) {
     <>
       <Card className="product-card bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 mb-2">
         <div className="relative w-full pt-[100%]">
-          {imageUrl ? (
+          {mainImageUrl ? (
             <>
               <Image
-                src={getOptimizedUrl(imageUrl)}
+                src={getOptimizedUrl(mainImageUrl)}
                 alt={product.name}
                 fill
                 className="object-cover cursor-pointer"
@@ -90,13 +123,21 @@ export function ProductCard({ product }: ProductCardProps) {
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
-                onClick={() => setIsImageModalOpen(true)}
+                onClick={openImageModal}
               />
+
+              {/* Indicador de múltiples imágenes */}
+              {allImages.length > 1 && (
+                <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                  {allImages.length} imágenes
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsImageModalOpen(true);
+                  openImageModal();
                 }}
                 className="absolute bottom-2 right-2 bg-white/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-colors"
                 aria-label="Ampliar imagen"
@@ -111,6 +152,7 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
+        {/* El resto del código de la tarjeta se mantiene igual */}
         <div className="p-3">
           <h3 className="font-bold text-gray-900 text-base line-clamp-2 mb-1 uppercase">
             {product.name}
@@ -157,9 +199,9 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </Card>
 
-      {/* Modal de imagen ampliada */}
+      {/* Modal de imágenes ampliadas (carrusel) */}
       <AnimatePresence>
-        {isImageModalOpen && imageUrl && (
+        {isImageModalOpen && allImages.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -171,25 +213,114 @@ export function ProductCard({ product }: ProductCardProps) {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-full max-h-full"
+              className="relative max-w-full max-h-full w-full max-w-4xl"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 type="button"
                 onClick={() => setIsImageModalOpen(false)}
-                className="absolute -top-10 right-0 text-white bg-black/50 p-2 rounded-full hover:bg-black"
+                className="absolute -top-10 right-0 text-white bg-black/50 p-2 rounded-full hover:bg-black z-10"
                 aria-label="Cerrar"
               >
                 <X className="h-6 w-6" />
               </button>
-              <Image
-                src={getFullSizeUrl(imageUrl)} // ✅ También es string seguro
-                alt={product.name}
-                width={600}
-                height={600}
-                className="max-h-[90vh] w-auto object-contain rounded-lg shadow-2xl"
-                priority
-              />
+
+              {/* Imagen principal del carrusel */}
+              <div className="relative">
+                <Image
+                  src={getFullSizeUrl(allImages[currentImageIndex])}
+                  alt={`${product.name} - Imagen ${currentImageIndex + 1} de ${
+                    allImages.length
+                  }`}
+                  width={800}
+                  height={600}
+                  className="max-h-[70vh] w-auto mx-auto object-contain rounded-lg shadow-2xl"
+                  priority
+                />
+
+                {/* Controles de navegación (solo si hay más de 1 imagen) */}
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        prevImage();
+                      }}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black transition-colors"
+                      aria-label="Imagen anterior"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nextImage();
+                      }}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black transition-colors"
+                      aria-label="Siguiente imagen"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+
+                {/* Indicador de posición (miniaturas o puntos) */}
+                <div className="flex justify-center mt-4 space-x-2">
+                  {allImages.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(index);
+                      }}
+                      className={`w-3 h-3 rounded-full ${
+                        index === currentImageIndex
+                          ? "bg-white"
+                          : "bg-gray-500 hover:bg-gray-300"
+                      }`}
+                      aria-label={`Ver imagen ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Contador de imágenes */}
+                <div className="text-center text-white mt-2 text-sm">
+                  {currentImageIndex + 1} / {allImages.length}
+                </div>
+              </div>
+
+              {/* Miniaturas de todas las imágenes (opcional, para muchos desplazamientos) */}
+              {allImages.length > 5 && (
+                <div className="flex overflow-x-auto space-x-2 mt-4 py-2">
+                  {allImages.map((img, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(index);
+                      }}
+                      className={`flex-shrink-0 w-16 h-16 rounded border-2 ${
+                        index === currentImageIndex
+                          ? "border-white"
+                          : "border-transparent"
+                      } overflow-hidden`}
+                    >
+                      <Image
+                        src={getOptimizedUrl(img)}
+                        alt={`Miniatura ${index + 1}`}
+                        width={64}
+                        height={64}
+                        className="object-cover w-full h-full"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

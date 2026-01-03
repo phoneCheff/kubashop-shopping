@@ -39,9 +39,16 @@ export default function CartPage() {
     Object.entries(groupedByCoin).forEach(([coin, group]) => {
       message += `--- Productos en ${coin} ---\n`;
       group.items.forEach((item) => {
-        message += `- ${item.name} x${
-          item.quantity
-        } → ${item.priceWithMargin.toFixed(2)} ${coin}\n`;
+        message += `- ${item.name}`;
+
+        // Agregar custom_slug si existe
+        if (item.custom_slug) {
+          message += ` (ID: ${item.custom_slug})`;
+        }
+
+        message += ` x${item.quantity} → ${item.priceWithMargin.toFixed(
+          2
+        )} ${coin}\n`;
       });
       message += `\nSubtotal en ${coin}: ${group.subtotal.toFixed(
         2
@@ -152,6 +159,7 @@ export default function CartPage() {
                           {item.priceWithMargin.toFixed(2)} {coin} ×{" "}
                           {item.quantity}
                         </span>
+
                         <button
                           onClick={() => removeFromCart(item.id)}
                           className="text-red-500 hover:text-red-700 text-sm font-medium"

@@ -11,6 +11,17 @@
   scrollbar-width: none;
 }
 
+@layer utilities {
+  .sticky-nav {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0;
+    /* Fuerza composición GPU para mejor rendimiento */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

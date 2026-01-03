@@ -10,6 +10,7 @@ type CartItem = {
   coin: string;
   priceWithMargin: number;
   image: string | null;
+  custom_slug: string;
   quantity: number;
   clientPhone: string;
 };
@@ -23,6 +24,7 @@ type CartContextType = {
     price: number;
     coin: string;
     priceWithMargin: number;
+    custom_slug: string;
     image: string | null; // ✅ Corregido: ahora acepta null
     clientPhone: string;
   }) => void;
@@ -62,6 +64,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     price: number;
     coin: string;
     priceWithMargin: number;
+    custom_slug: string;
     image: string | null;
     clientPhone: string;
   }) => {
