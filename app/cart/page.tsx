@@ -2,22 +2,19 @@
 "use client";
 
 import { useCart } from "@/components/CartProvider";
-import NoImagePlaceholder from "@/components/NoImagePlaceholder"; // Ajusta la ruta si es necesario
+import NoImagePlaceholder from "@/components/NoImagePlaceholder";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { calculateRoundedPrice } from "@/lib/priceUtils";
 import { ShoppingCart, Smartphone, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function CartPage() {
-  const { items, removeFromCart, clearCart, myPhone } = useCart();
+  const { items, removeFromCart, updateQuantity, clearCart, myPhone } =
+    useCart(); // ✅ añadido updateQuantity
   const [isLoading, setIsLoading] = useState(false);
-
-  // Función para calcular precio con +10%
-  const calculatePrice = (item: any) => {
-    return item.price + (item.price * 10) / 100;
-  };
 
   // 🧮 Agrupar por moneda (item.coin)
   const groupedByCoin = items.reduce((acc, item) => {
@@ -25,7 +22,7 @@ export default function CartPage() {
     if (!acc[coin]) {
       acc[coin] = { items: [], subtotal: 0 };
     }
-    const priceWithMargin = calculatePrice(item);
+    const priceWithMargin = calculateRoundedPrice(item.price);
     const lineTotal = priceWithMargin * item.quantity;
     acc[coin].items.push({ ...item, priceWithMargin });
     acc[coin].subtotal += lineTotal;
@@ -56,9 +53,7 @@ export default function CartPage() {
     });
 
     message += "Gracias.";
-    return `https://wa.me/${
-      myPhone || "TU_NUMERO_DE_WHATSAPP"
-    }?text=${encodeURIComponent(message)}`;
+    return `https://wa.me/${myPhone}?text=${encodeURIComponent(message)}`;
   };
 
   const whatsappLink = generateWhatsAppMessage();
@@ -140,7 +135,6 @@ export default function CartPage() {
                           width={50}
                           height={50}
                           className="object-cover w-full h-full"
-                          // Opcional: manejar error si quieres ocultar la imagen rota
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display =
                               "none";
@@ -154,15 +148,45 @@ export default function CartPage() {
                       <h3 className="font-medium text-gray-900 text-sm line-clamp-2 uppercase mt-2">
                         {item.name}
                       </h3>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-emerald-700 font-bold text-sm">
-                          {item.priceWithMargin.toFixed(2)} {coin} ×{" "}
-                          {item.quantity}
-                        </span>
+                      <div className="flex justify-between items-start mt-1">
+                        <div className="flex flex-col">
+                          {/* Precio unitario */}
+                          <span className="text-emerald-700 font-bold text-lg">
+                            {calculateRoundedPrice(item.price)} {item.coin}
+                          </span>
+                          {/* Controles de cantidad */}
+                          <div className="flex items-center gap-2 mt-1">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (item.quantity > 1) {
+                                  updateQuantity(item.id, item.quantity - 1);
+                                }
+                              }}
+                              className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300 text-sm font-bold"
+                              aria-label="Reducir cantidad"
+                            >
+                              -
+                            </button>
+                            <span className="text-gray-900 font-medium text-sm min-w-[24px] text-center">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.id, item.quantity + 1);
+                              }}
+                              className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 hover:bg-gray-300 text-sm font-bold"
+                              aria-label="Aumentar cantidad"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
 
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-red-500 hover:text-red-700 text-sm font-medium"
+                          className="text-red-500 hover:text-red-700 text-sm font-medium self-end"
                         >
                           Eliminar
                         </button>

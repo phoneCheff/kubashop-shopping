@@ -1,6 +1,7 @@
 // components/CartProvider.tsx
 "use client";
 
+import { calculateRoundedPrice } from "@/lib/priceUtils";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type CartItem = {
@@ -24,9 +25,10 @@ type CartContextType = {
     coin: string;
     priceWithMargin: number;
     custom_slug: string;
-    image: string | null; // ✅ Corregido: ahora acepta null
+    image: string | null;
   }) => void;
   removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void; // ✅ Nueva función
   clearCart: () => void;
   getTotalItems: () => number;
   getWhatsAppLink: () => string;
@@ -43,7 +45,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const savedCart = localStorage.getItem("kubashop-cart");
     if (savedCart) {
       try {
-        setItems(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart);
+        // Asegurarnos de que todos los items tengan `priceWithMargin` (por si viene de versión anterior)
+        const withMargin = parsed.map((item: any) => ({
+          ...item,
+          priceWithMargin: item.priceWithMargin ?? item.price * 1.1,
+        }));
+        setItems(withMargin);
       } catch (e) {
         console.error("Error parsing cart from localStorage", e);
         setItems([]);
@@ -79,6 +87,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         {
           ...product,
           quantity: 1,
+          priceWithMargin: calculateRoundedPrice(product.price),
           image: product.image || null,
         },
       ];
@@ -87,6 +96,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // ✅ Nueva función: actualizar cantidad
+  const updateQuantity = (id: string, quantity: number) => {
+    if (quantity < 1) return; // Evita cantidades no válidas
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
   };
 
   const clearCart = () => {
@@ -143,6 +160,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         myPhone,
         addToCart,
         removeFromCart,
+        updateQuantity, // ✅ Exportada
         clearCart,
         getTotalItems,
         getWhatsAppLink,

@@ -1,7 +1,8 @@
 // app/category/[slug]/page.tsx
 
-import { ProductCard } from "@/components/ProductCard";
+import { ProductGrid } from "@/components/ProductGrid";
 import { supabase } from "@/lib/supabase";
+import { ProductType } from "@/types/ProductType";
 
 export const revalidate = 21600;
 
@@ -16,19 +17,6 @@ export async function generateStaticParams() {
 
   return validSlugs.map((slug) => ({ slug }));
 }
-
-type ProductType = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  coin: string;
-  priceWithMargin: number;
-  gender: string | null;
-  client_phone: string;
-  custom_slug: string;
-  link_images: { links: string[] };
-};
 
 export default async function CategoryPage({
   params,
@@ -117,9 +105,7 @@ export default async function CategoryPage({
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 capitalize">{category.name}</h1>
       <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        <ProductGrid products={products} />
       </div>
     </div>
   );

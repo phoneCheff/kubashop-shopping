@@ -4,8 +4,10 @@
 import { useCart } from "@/components/CartProvider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { calculateRoundedPrice } from "@/lib/priceUtils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowRight,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -103,6 +105,15 @@ export function ProductCard({ product }: ProductCardProps) {
     setIsAdded(true);
   };
 
+  // Función para calcular precio con +10%
+
+  const handleViewDetails = () => {
+    // ✅ Guardar el producto completo en sessionStorage
+    sessionStorage.setItem(`product_${product.id}`, JSON.stringify(product));
+    // Luego navegar
+    window.location.href = `/product/${product.id}`;
+  };
+
   return (
     <>
       <Card className="product-card bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 mb-2">
@@ -156,24 +167,26 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
 
           <div className="flex justify-between items-center mb-2">
-            <p className="text-black font-bold text-lg">
-              ${((product.price * 10) / 100 + product.price).toFixed(2)}{" "}
-              {product.coin}
-            </p>
-            {product.gender && (
-              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                {product.gender}
-              </span>
-            )}
+            <p>{product.price}</p>
+            <span className="text-emerald-700 font-bold text-lg">
+              {calculateRoundedPrice(product.price)} {product.coin}
+            </span>
           </div>
-          <p className="text-xs text-gray-700 px-2 py-0.5 mb-2">
-            {product.description}
-          </p>
+          {/* 🆕 Botón: Ver más detalles */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleViewDetails}
+            className="w-full mt-2 text-sm text-gray-500 hover:text-emerald-600 font-medium flex items-center justify-center gap-1 transition-colors"
+          >
+            Ver más detalles
+            <ArrowRight className="h-4 w-4" />
+          </Button>
 
           <Button
             onClick={handleAddToCart}
             disabled={isLoading}
-            className={`w-full font-medium rounded-lg transition-colors ${
+            className={`w-full mt-1 font-medium rounded-lg transition-colors ${
               isAdded
                 ? "bg-green-500 hover:bg-green-600"
                 : "bg-emerald-600 hover:bg-emerald-700"
