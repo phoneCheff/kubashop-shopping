@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation"; // Añade este import
 import { useEffect, useState } from "react";
 import { CATEGORIES } from "./NavBarData";
+import { ProductSearch } from "./ProductSearch";
 
 export function Navbar() {
   const { items } = useCart();
@@ -84,7 +85,7 @@ export function Navbar() {
                   href={link.href}
                   className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all ${
                     pathname === link.href // Cambiado: usa pathname en lugar de window.location
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      ? "bg-blue-50 text-[#002A8F] shadow-sm"
                       : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
@@ -101,7 +102,7 @@ export function Navbar() {
                     isCategoriesOpen ||
                     activeCategory ||
                     pathname?.startsWith("/category/") // También puedes verificar si estamos en una categoría
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      ? "bg-blue-50 text-[#002A8F] shadow-sm"
                       : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
@@ -144,6 +145,9 @@ export function Navbar() {
                 </AnimatePresence>
               </div>
             </div>
+            <div className="hidden lg:flex items-center flex-1 max-w-md mx-4">
+              <ProductSearch />
+            </div>
 
             {/* Acciones de usuario - desktop y mobile */}
             <div className="flex items-center space-x-2">
@@ -154,18 +158,18 @@ export function Navbar() {
                 aria-label="Carrito de compras"
               >
                 <div className="relative">
-                  <ShoppingCart className="h-6 w-6 text-gray-800 group-hover:text-blue-600 transition-colors" />
+                  <ShoppingCart className="h-6 w-6 text-gray-800 group-hover:text-[#002A8F] transition-colors" />
                   {totalItems > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white shadow-md"
+                      className="absolute -top-2 -right-2 bg-[#CF142B] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white shadow-md"
                     >
                       {totalItems}
                     </motion.span>
                   )}
                 </div>
-                <span className="ml-2 text-sm font-medium text-gray-700 hidden md:block group-hover:text-blue-600 transition-colors">
+                <span className="ml-2 text-sm font-medium text-gray-700 hidden md:block group-hover:text-[#002A8F] transition-colors">
                   Carrito
                 </span>
               </Link>
@@ -198,7 +202,7 @@ export function Navbar() {
             className="md:hidden fixed inset-0 z-40 bg-white shadow-xl"
           >
             {/* Header del drawer */}
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-gray-50">
               <button
                 onClick={() => setIsMenuOpen(false)}
                 className="p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
@@ -206,6 +210,10 @@ export function Navbar() {
               >
                 <X className="h-6 w-6" />
               </button>
+            </div>
+
+            <div className="mb-6 px-1">
+              <ProductSearch onCloseMenu={() => setIsMenuOpen(false)} />
             </div>
 
             {/* Contenido del drawer */}
@@ -221,7 +229,9 @@ export function Navbar() {
                       key={cat.id}
                       href={`/category/${cat.slug}`}
                       className={`flex flex-col items-center justify-center p-4 rounded-xl ${cat.color} hover:opacity-90 transition-all`}
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false); // Cerrar menú al hacer clic
+                      }}
                     >
                       <div className="text-2xl mb-2">{cat.icon}</div>
                       <span className="font-medium text-sm">{cat.name}</span>
@@ -242,10 +252,12 @@ export function Navbar() {
                       href={link.href}
                       className={`flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors font-medium ${
                         pathname === link.href
-                          ? "text-blue-600 bg-blue-50"
+                          ? "text-[#002A8F] bg-blue-50"
                           : "text-gray-700"
                       }`}
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false); // Cerrar menú al hacer clic
+                      }}
                     >
                       <span className="text-xl mr-3">{link.icon}</span>
                       <span className="text-lg">{link.name}</span>
@@ -260,10 +272,12 @@ export function Navbar() {
                   href="/cart"
                   className={`w-full block p-4 rounded-xl font-bold text-lg text-center transition-colors shadow-lg ${
                     pathname === "/cart"
-                      ? "bg-blue-700 text-white"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-gradient-to-r from-[#1E40AF] to-[#002A8F] text-white"
+                      : "bg-gradient-to-r from-[#002A8F] via-[#1E40AF] to-[#002A8F] text-white hover:shadow-xl"
                   }`}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    setIsMenuOpen(false); // Cerrar menú al hacer clic
+                  }}
                 >
                   <div className="flex items-center justify-center">
                     <ShoppingCart className="h-5 w-5 mr-2" />

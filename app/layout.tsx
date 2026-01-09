@@ -1,8 +1,10 @@
 // app/layout.tsx (agregar el proveedor)
 import { CartProvider } from "@/components/CartProvider";
 import { Navbar } from "@/components/Navbar";
+import { PageTransitionLoader } from "@/components/PageTransitionLoader";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -37,9 +39,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="KubaShop" />
       </head>
       <body className={inter.className}>
+        <Suspense fallback={<div>Cargando...</div>}>
+          <PageTransitionLoader />
+        </Suspense>
         <CartProvider>
           <div className="flex flex-col min-h-screen">
             <Navbar />
+
             <main className="flex-1">{children}</main>
           </div>
         </CartProvider>

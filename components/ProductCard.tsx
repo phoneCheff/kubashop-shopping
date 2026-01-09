@@ -167,7 +167,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
 
           <div className="flex justify-between items-center mb-2">
-            <span className="text-emerald-700 font-bold text-lg">
+            <span className="text-[#002A8F] font-bold text-lg">
               {product.price}-
               {calculateRoundedPrice(product.price, product.coin)}{" "}
               {product.coin}
@@ -178,7 +178,7 @@ export function ProductCard({ product }: ProductCardProps) {
             type="button"
             variant="outline"
             onClick={handleViewDetails}
-            className="w-full mt-2 text-sm text-gray-500 hover:text-emerald-600 font-medium flex items-center justify-center gap-1 transition-colors"
+            className="w-full mt-2 text-sm text-gray-500 hover:text-[#002A8F] font-medium flex items-center justify-center gap-1 transition-colors"
           >
             Ver más detalles
             <ArrowRight className="h-4 w-4" />
@@ -187,25 +187,30 @@ export function ProductCard({ product }: ProductCardProps) {
           <Button
             onClick={handleAddToCart}
             disabled={isLoading}
-            className={`w-full mt-1 font-medium rounded-lg transition-colors ${
+            className={`w-full mt-1 font-medium rounded-lg transition-colors relative overflow-hidden ${
               isAdded
-                ? "bg-green-500 hover:bg-green-600"
-                : "bg-emerald-600 hover:bg-emerald-700"
-            } text-white h-11`}
+                ? "bg-gradient-to-r from-[#1E40AF] to-[#002A8F]"
+                : "bg-gradient-to-r from-[#002A8F] via-[#1E40AF] to-[#002A8F]"
+            } text-white h-11 hover:shadow-lg`}
           >
-            {isLoading ? (
-              <span className="flex items-center justify-center">
-                <span className="animate-spin mr-2">⏳</span> Agregando...
-              </span>
-            ) : isAdded ? (
-              <span className="flex items-center justify-center">
-                <Check className="mr-2 h-4 w-4" /> ¡Agregado!
-              </span>
-            ) : (
-              <span className="flex items-center justify-center">
-                <Plus className="mr-2 h-4 w-4" /> Agregar al carrito
-              </span>
+            {isAdded && (
+              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
             )}
+            <span className="relative flex items-center justify-center">
+              {isLoading ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span> Agregando...
+                </>
+              ) : isAdded ? (
+                <>
+                  <Check className="mr-2 h-4 w-4" /> ¡Agregado!
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" /> Agregar al carrito
+                </>
+              )}
+            </span>
           </Button>
         </div>
       </Card>

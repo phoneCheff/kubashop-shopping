@@ -42,7 +42,6 @@ function parseDescription(description: string): {
     return { features: [], sections: [] };
   }
 
-  // Separar por asteriscos, eliminando espacios en blanco y entradas vacías
   const parts = description
     .split("*")
     .map((part) => part.trim())
@@ -51,14 +50,10 @@ function parseDescription(description: string): {
   const features: Array<{ key: string; value: string }> = [];
   const sections: Array<{ type: "feature" | "text"; content: any }> = [];
 
-  // Expresión regex para detectar propiedad:valor (sensible a acentos y espacios)
   const featureRegex = /^([A-Za-záéíóúÁÉÍÓÚñÑüÜ\s\-]+):\s*(.+)$/;
 
   parts.forEach((part, index) => {
-    // Limpiar espacios múltiples y normalizar
     const cleanPart = part.replace(/\s+/g, " ").trim();
-
-    // Verificar si es una característica (formato propiedad: valor)
     const match = cleanPart.match(featureRegex);
 
     if (match) {
@@ -73,7 +68,6 @@ function parseDescription(description: string): {
         content: feature,
       });
     } else {
-      // Es texto libre
       sections.push({
         type: "text",
         content: cleanPart,
@@ -92,7 +86,6 @@ function FeatureHighlight({
 }) {
   if (features.length === 0) return null;
 
-  // Características comunes para destacar
   const highlightedFeatures = [
     "RAM",
     "Almacenamiento",
@@ -110,9 +103,9 @@ function FeatureHighlight({
   ];
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl border border-emerald-100 p-6 mb-6 shadow-sm">
+    <div className="bg-gradient-to-br from-blue-50 to-gray-50 rounded-2xl border border-blue-100 p-6 mb-6 shadow-sm">
       <div className="flex items-center mb-4">
-        <Zap className="h-5 w-5 mr-2 text-emerald-600" />
+        <Zap className="h-5 w-5 mr-2 text-[#002A8F]" />
         <h3 className="font-bold text-gray-900 text-lg">
           Características principales
         </h3>
@@ -125,20 +118,20 @@ function FeatureHighlight({
               feature.key.toLowerCase().includes(hf.toLowerCase())
             )
           )
-          .slice(0, 6) // Máximo 6 características destacadas
+          .slice(0, 6)
           .map((feature, index) => (
             <div
               key={index}
-              className="bg-white/70 backdrop-blur-sm rounded-lg p-3 border border-emerald-100 hover:border-emerald-300 transition-colors"
+              className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-blue-100 hover:border-[#002A8F] transition-colors"
             >
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
-                  <span className="text-emerald-600 font-bold text-sm">
+                <div className="w-8 h-8 rounded-full bg-[#002A8F]/10 flex items-center justify-center mr-3">
+                  <span className="text-[#002A8F] font-bold text-sm">
                     {index + 1}
                   </span>
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-800">
+                  <div className="font-semibold text-gray-800 capitalize">
                     {feature.key}
                   </div>
                   <div className="text-gray-700 font-medium">
@@ -164,7 +157,7 @@ function AllFeaturesTable({
   return (
     <div className="bg-white rounded-xl border p-6 mb-6">
       <h3 className="font-bold text-gray-900 text-lg mb-4 flex items-center">
-        <ChevronRight className="h-5 w-5 mr-2 text-emerald-600" />
+        <ChevronRight className="h-5 w-5 mr-2 text-[#002A8F]" />
         Especificaciones técnicas
       </h3>
 
@@ -178,7 +171,7 @@ function AllFeaturesTable({
           >
             <div className="w-2/5 md:w-1/3">
               <div className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
+                <div className="w-2 h-2 rounded-full bg-[#002A8F] mr-2"></div>
                 <span className="font-semibold text-gray-800">
                   {feature.key}
                 </span>
@@ -208,16 +201,13 @@ function FormattedDescription({ description }: { description: string }) {
     );
   }
 
-  // Separar las secciones por tipo
   const textSections = sections.filter((s) => s.type === "text");
   const featureSections = sections.filter((s) => s.type === "feature");
 
   return (
     <div className="space-y-6">
-      {/* Características destacadas (solo si hay características) */}
       {features.length > 0 && <FeatureHighlight features={features} />}
 
-      {/* Mostrar el contenido en el orden original */}
       <div className="space-y-4">
         {sections.map((section, index) => {
           if (section.type === "feature") {
@@ -225,11 +215,11 @@ function FormattedDescription({ description }: { description: string }) {
             return (
               <div
                 key={index}
-                className="bg-gray-50 rounded-lg p-4 border-l-4 border-emerald-500"
+                className="bg-gray-50 rounded-lg p-4 border-l-4 border-[#002A8F]"
               >
                 <div className="flex items-center">
-                  <Star className="h-4 w-4 mr-2 text-emerald-600" />
-                  <span className="font-bold text-gray-800">
+                  <Star className="h-4 w-4 mr-2 text-[#002A8F]" />
+                  <span className="font-bold text-gray-800 capitalize">
                     {feature.key}:
                   </span>
                   <span className="ml-2 text-gray-700">{feature.value}</span>
@@ -247,9 +237,6 @@ function FormattedDescription({ description }: { description: string }) {
           }
         })}
       </div>
-
-      {/* Tabla completa de características (opcional, se puede comentar) */}
-      {/*features.length > 0 && <AllFeaturesTable features={features} />*/}
     </div>
   );
 }
@@ -309,14 +296,13 @@ export default function ProductDetailPage() {
       <div className="container mx-auto px-4 py-6">
         <button
           onClick={() => window.history.back()}
-          className="flex items-center text-gray-700 hover:text-gray-900 mb-6 group"
+          className="flex items-center text-gray-700 hover:text-[#002A8F] mb-6 group transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform" />
           Volver al catálogo
         </button>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Columna de imágenes */}
           <div className="lg:w-1/2">
             <div className="sticky top-6">
               {mainImage ? (
@@ -355,10 +341,8 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* Columna de información */}
           <div className="lg:w-1/2">
             <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
-              {/* Nombre y precio */}
               <div className="mb-8 pb-8 border-b border-gray-200">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -367,7 +351,7 @@ export default function ProductDetailPage() {
                     </h1>
                     <div className="flex items-center gap-3">
                       <p className="text-2xl">Precio:</p>
-                      <p className="text-4xl font-bold text-emerald-700">
+                      <p className="text-4xl font-bold text-[#002A8F]">
                         {calculateRoundedPrice(product.price, product.coin)}{" "}
                         {product.coin}
                       </p>
@@ -376,11 +360,10 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Descripción con formato */}
               <div className="mb-10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-bold text-gray-900 text-xl flex items-center">
-                    <Info className="h-6 w-6 mr-3 text-emerald-600" />
+                    <Info className="h-6 w-6 mr-3 text-[#002A8F]" />
                     Detalles del producto
                   </h3>
                   <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -390,43 +373,36 @@ export default function ProductDetailPage() {
                 </div>
 
                 <FormattedDescription description={product.description} />
-
-                {/* Instrucciones de formato 
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 flex items-center">
-                    <Info className="h-4 w-4 mr-2" />
-                    <span className="font-medium">Formato de descripción:</span>
-                    <span className="ml-2">
-                      Usa * para separar características (ej: *RAM: 8GB
-                      *Almacenamiento: 256GB)
-                    </span>
-                  </p>
-                </div>*/}
               </div>
 
-              {/* Botón de añadir al carrito */}
               <Button
                 onClick={handleAddToCart}
-                className={`w-full h-16 text-xl font-bold rounded-2xl transition-all duration-300 transform hover:scale-[1.02] ${
-                  isAdded
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-2xl shadow-green-300"
-                    : "bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 shadow-2xl hover:shadow-3xl hover:shadow-emerald-300"
-                } text-white`}
+                className="w-full h-16 text-xl font-bold rounded-2xl transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-[#002A8F] via-[#1E40AF] to-[#002A8F] shadow-2xl hover:shadow-3xl hover:shadow-blue-300 text-white relative overflow-hidden"
               >
-                {isAdded ? (
-                  <>
-                    <Check className="mr-3 h-6 w-6 animate-bounce" />
-                    ¡Agregado al carrito!
-                  </>
-                ) : (
-                  <>
-                    <Plus className="mr-3 h-6 w-6" />
-                    Añadir al carrito
-                  </>
-                )}
-              </Button>
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r from-[#1E40AF] to-[#002A8F] transition-opacity duration-300 ${
+                    isAdded ? "opacity-100" : "opacity-0"
+                  }`}
+                ></div>
 
-              {/* Info adicional */}
+                <span
+                  className={`relative flex items-center justify-center transition-all duration-300 ${
+                    isAdded ? "scale-110" : "scale-100"
+                  }`}
+                >
+                  {isAdded ? (
+                    <>
+                      <Check className="mr-3 h-6 w-6" />
+                      ¡Agregado al carrito!
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-3 h-6 w-6" />
+                      Añadir al carrito
+                    </>
+                  )}
+                </span>
+              </Button>
             </div>
           </div>
         </div>

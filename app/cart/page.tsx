@@ -86,7 +86,7 @@ export default function CartPage() {
             categorías y encuentra algo que te guste!
           </p>
           <Link href="/">
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-lg shadow-md">
+            <Button className="bg-gradient-to-r from-[#002A8F] via-[#1E40AF] to-[#002A8F] hover:shadow-xl text-white font-bold px-8 py-4 rounded-lg shadow-md transition-all">
               Ir a inicio
             </Button>
           </Link>
@@ -107,12 +107,12 @@ export default function CartPage() {
     <div className="min-h-screen bg-gray-50 pb-24 flex items-center justify-center">
       <div className="container py-4">
         <div className="flex items-center justify-between mb-5">
-          <h1 className="text-2xl font-bold text-gray-800 ml-2">Mi carrito</h1>
+          <h1 className="text-2xl font-bold text-[#002A8F] ml-2">Mi carrito</h1>
           {items.length > 0 && (
             <Button
               variant="ghost"
               onClick={clearCart}
-              className="text-red-500 hover:bg-red-50 text-sm"
+              className="text-[#CF142B] hover:bg-red-50 text-sm"
             >
               <Trash2 className="mr-1 h-4 w-4" />
               Vaciar todo
@@ -128,8 +128,10 @@ export default function CartPage() {
           >
             <div className="p-4">
               <div className="flex justify-between items-center mb-3">
-                <h2 className="font-bold text-lg">Productos en {coin}</h2>
-                <span className="text-emerald-700 font-bold text-xl">
+                <h2 className="font-bold text-lg text-gray-800">
+                  Productos en {coin}
+                </h2>
+                <span className="text-[#002A8F] font-bold text-xl">
                   {group.subtotal.toFixed(2)} {coin}
                 </span>
               </div>
@@ -164,7 +166,7 @@ export default function CartPage() {
                       <div className="flex justify-between items-start mt-1">
                         <div className="flex flex-col">
                           {/* Precio unitario */}
-                          <span className="text-emerald-700 font-bold text-lg">
+                          <span className="text-[#002A8F] font-bold text-lg">
                             {calculateRoundedPrice(item.price, item.coin)}{" "}
                             {item.coin}
                           </span>
@@ -200,7 +202,7 @@ export default function CartPage() {
 
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-red-500 hover:text-red-700 text-sm font-medium self-end"
+                          className="text-[#CF142B] hover:text-[#B91C1C] text-sm font-medium self-end"
                         >
                           Eliminar
                         </button>
@@ -226,15 +228,15 @@ export default function CartPage() {
             </p>
             <ul className="mt-3 space-y-2 text-sm">
               <li className="flex items-start">
-                <span className="text-emerald-600 mr-2">✓</span>
+                <span className="text-[#002A8F] mr-2">✓</span>
                 <span>Confirmación del pedido</span>
               </li>
               <li className="flex items-start">
-                <span className="text-emerald-600 mr-2">✓</span>
+                <span className="text-[#002A8F] mr-2">✓</span>
                 <span>Métodos de pago por moneda</span>
               </li>
               <li className="flex items-start">
-                <span className="text-emerald-600 mr-2">✓</span>
+                <span className="text-[#002A8F] mr-2">✓</span>
                 <span>Entrega o recogida</span>
               </li>
             </ul>
@@ -247,7 +249,7 @@ export default function CartPage() {
             <Button
               onClick={handleWhatsAppClick}
               disabled={isLoading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg py-4 rounded-xl transition-colors shadow-md"
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg py-4 rounded-xl transition-all shadow-md hover:shadow-lg"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
