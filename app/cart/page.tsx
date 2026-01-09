@@ -22,7 +22,7 @@ export default function CartPage() {
     if (!acc[coin]) {
       acc[coin] = { items: [], subtotal: 0 };
     }
-    const priceWithMargin = calculateRoundedPrice(item.price);
+    const priceWithMargin = calculateRoundedPrice(item.price, item.coin);
     const lineTotal = priceWithMargin * item.quantity;
     acc[coin].items.push({ ...item, priceWithMargin });
     acc[coin].subtotal += lineTotal;
@@ -38,9 +38,22 @@ export default function CartPage() {
       group.items.forEach((item) => {
         message += `- ${item.name}`;
 
-        // Agregar custom_slug si existe
         if (item.custom_slug) {
-          message += ` (ID: ${item.custom_slug})`;
+          const partes = item.custom_slug.split("-");
+          const comision_extra =
+            calculateRoundedPrice(item.price, item.coin) - Number(partes[2]);
+          const comision_final = Number(partes[3]) + comision_extra;
+
+          // clientId-categoryId-priceID-comisionFija-safeName-timestamp
+          //   0         1          2           3          4         5
+
+          if (partes.length >= 6) {
+            const slugWhatsApp = `${partes[0]}-${partes[2]}-${partes[3]}-${comision_extra}-${partes[4]}-${comision_final}`;
+            message += ` (ID: ${slugWhatsApp})`;
+          } else {
+            // fallback por seguridad
+            message += ` (ID: ${item.custom_slug})`;
+          }
         }
 
         message += ` x${item.quantity} → ${item.priceWithMargin.toFixed(
@@ -152,7 +165,8 @@ export default function CartPage() {
                         <div className="flex flex-col">
                           {/* Precio unitario */}
                           <span className="text-emerald-700 font-bold text-lg">
-                            {calculateRoundedPrice(item.price)} {item.coin}
+                            {calculateRoundedPrice(item.price, item.coin)}{" "}
+                            {item.coin}
                           </span>
                           {/* Controles de cantidad */}
                           <div className="flex items-center gap-2 mt-1">

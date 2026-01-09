@@ -87,7 +87,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         {
           ...product,
           quantity: 1,
-          priceWithMargin: calculateRoundedPrice(product.price),
+          priceWithMargin: calculateRoundedPrice(product.price, product.coin),
           image: product.image || null,
         },
       ];

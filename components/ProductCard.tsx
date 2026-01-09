@@ -124,7 +124,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 src={getOptimizedUrl(mainImageUrl)}
                 alt={product.name}
                 fill
-                className="object-cover cursor-pointer"
+                className="object-cover cursor-pointer border-b-1 border-gray-500"
                 sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                 placeholder="blur"
                 blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhESMIAAAAABJRU5ErkJggg=="
@@ -167,9 +167,10 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
 
           <div className="flex justify-between items-center mb-2">
-            <p>{product.price}</p>
             <span className="text-emerald-700 font-bold text-lg">
-              {calculateRoundedPrice(product.price)} {product.coin}
+              {product.price}-
+              {calculateRoundedPrice(product.price, product.coin)}{" "}
+              {product.coin}
             </span>
           </div>
           {/* 🆕 Botón: Ver más detalles */}
@@ -236,7 +237,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </button>
 
               {/* Imagen principal del carrusel */}
-              <div className="relative">
+              <div className="relative border-b-2 border-black">
                 <Image
                   src={getFullSizeUrl(allImages[currentImageIndex])}
                   alt={`${product.name} - Imagen ${currentImageIndex + 1} de ${

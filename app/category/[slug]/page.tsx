@@ -104,7 +104,7 @@ export default async function CategoryPage({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 capitalize">{category.name}</h1>
-      <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6">
+      <div className="">
         <ProductGrid products={products} />
       </div>
     </div>
