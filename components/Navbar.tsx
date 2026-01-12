@@ -212,7 +212,7 @@ export function Navbar() {
               </button>
             </div>
 
-            <div className="mb-6 px-1">
+            <div className="mb-6 px-1 mt-1">
               <ProductSearch onCloseMenu={() => setIsMenuOpen(false)} />
             </div>
 
@@ -228,12 +228,13 @@ export function Navbar() {
                     <Link
                       key={cat.id}
                       href={`/category/${cat.slug}`}
-                      className={`flex flex-col items-center justify-center p-4 rounded-xl ${cat.color} hover:opacity-90 transition-all`}
-                      onClick={() => {
-                        setIsMenuOpen(false); // Cerrar menú al hacer clic
-                      }}
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 ${cat.color} ${cat.hoverColor} hover:scale-105 hover:shadow-lg`}
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <div className="text-2xl mb-2">{cat.icon}</div>
+                      {/* Para móviles: icono más grande */}
+                      <div className="text-3xl mb-2 md:text-2xl">
+                        {cat.icon}
+                      </div>
                       <span className="font-medium text-sm">{cat.name}</span>
                     </Link>
                   ))}

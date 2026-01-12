@@ -17,12 +17,16 @@ export function PageTransitionLoader() {
       if (link && link.href) {
         const currentOrigin = window.location.origin;
         const linkOrigin = new URL(link.href).origin;
+        const currentPath = window.location.pathname + window.location.search;
+        const linkPath =
+          new URL(link.href).pathname + new URL(link.href).search;
 
-        if (linkOrigin === currentOrigin) {
+        // Solo activar si es mismo origen Y diferente ruta
+        if (linkOrigin === currentOrigin && currentPath !== linkPath) {
           setIsLoading(true);
-          // También remover la clase de búsqueda si existe
           document.body.classList.remove("search-loading");
         }
+        // Si es la misma ruta, NO activar el loader
       }
     };
 
@@ -31,9 +35,8 @@ export function PageTransitionLoader() {
   }, []);
 
   useEffect(() => {
-    // Cuando la ruta cambia, remover la clase de búsqueda
-    document.body.classList.remove("search-loading");
     setIsLoading(false);
+    document.body.classList.remove("search-loading");
   }, [pathname, searchParams]);
 
   return (
@@ -60,7 +63,6 @@ export function PageTransitionLoader() {
                 }}
               />
             </div>
-
             <p className="text-sm font-medium text-gray-600">Cargando...</p>
           </div>
         </motion.div>

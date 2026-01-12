@@ -1,13 +1,17 @@
-// types/product.ts
+// types/ProductType.ts
 export type ProductType = {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   price: number;
+  priceWithMargin?: number;
   coin: string;
-  priceWithMargin: number;
-  gender: string | null;
-  client_phone: string;
+  gender?: string;
+  client_phone?: string;
+  link_images: string[];
   custom_slug: string;
-  link_images: { links: string[] };
+  categories?: Array<{
+    id: string;
+    slug: string;
+  }>;
 };

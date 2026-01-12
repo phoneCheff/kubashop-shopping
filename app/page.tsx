@@ -2,9 +2,10 @@
 "use client";
 
 import { CATEGORIES } from "@/components/NavBarData";
+import { ProductSearch } from "@/components/ProductSearch";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, HelpCircle, X } from "lucide-react";
+import { Check, HelpCircle, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -31,28 +32,35 @@ function TutorialGuide() {
       target: "categorias",
     },
     {
-      title: "2. Agrega productos al carrito",
+      title: "2. Busca productos",
+      description:
+        "Utiliza la barra de busqueda para encontrar los que necesitas de forma rapida",
+      image: "🔎",
+      target: null,
+    },
+    {
+      title: "3. Agrega productos al carrito",
       description:
         "Haz clic en 'Agregar al carrito' en cualquier producto que te interese.",
       image: "🛒",
       target: null,
     },
     {
-      title: "3. Ver detalles del producto",
+      title: "4. Ver detalles del producto",
       description:
         "Haz clic en 'Ver más detalles' para ver especificaciones completas.",
       image: "🔍",
       target: null,
     },
     {
-      title: "4. Revisa tu carrito",
+      title: "5. Revisa tu carrito",
       description:
         "Accede al carrito para ver todos los productos seleccionados.",
       image: "📋",
       target: null,
     },
     {
-      title: "5. Envía tu pedido por WhatsApp",
+      title: "6. Envía tu pedido por WhatsApp",
       description:
         "Finaliza tu compra enviando el pedido directamente por WhatsApp.",
       image: "📱",
@@ -159,8 +167,7 @@ function TutorialGuide() {
                       Tutorial de KubaShop
                     </h3>
                     <p className="text-sm text-gray-500">
-                      Paso {currentStep + 1} de {steps.length} • Visita{" "}
-                      {visitCount}/8
+                      Paso {currentStep + 1} de {steps.length}
                     </p>
                   </div>
                   <button
@@ -270,13 +277,7 @@ export default function Home() {
             <p className="text-blue-100 mb-6 text-lg">
               Productos de calidad al mejor precio
             </p>
-            <Button
-              variant="secondary"
-              className="bg-white text-[#002A8F] font-bold px-6 py-3 hover:bg-blue-50 transition-colors"
-              onClick={scrollToCategorias}
-            >
-              Ver categorías <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <ProductSearch />
           </div>
         </section>
 

@@ -1,16 +1,14 @@
 // app/search/page.tsx
 import { ProductGrid } from "@/components/ProductGrid";
-import { supabase } from "@/lib/supabase";
-import { ProductType } from "@/types/ProductType";
+import { searchProducts } from "@/lib/products-cache";
 
-export const revalidate = 21600;
+export const revalidate = 21600; // 6 horas
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  // ✅ CORREGIDO: Usar await para desempacar searchParams
   const params = await searchParams;
   const searchQuery = params.q || "";
 
@@ -32,33 +30,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   try {
-    // Buscar productos por nombre
-    const { data: productsData, error } = await supabase
-      .from("products")
-      .select("*")
-      .ilike("name", `%${searchQuery}%`)
-      .eq("is_active", true)
-      .order("price", { ascending: true });
-
-    if (error) {
-      console.error("Error en búsqueda:", error);
-      throw error;
-    }
-
-    const products: ProductType[] = productsData
-      ? productsData.map((product) => ({
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          priceWithMargin: product.priceWithMargin,
-          coin: product.coin,
-          gender: product.gender,
-          client_phone: product.client_phone,
-          link_images: product.link_images,
-          custom_slug: product.custom_slug,
-        }))
-      : [];
+    // Usar la función de búsqueda desde el caché
+    const products = await searchProducts(searchQuery);
 
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4">
