@@ -1,15 +1,17 @@
 // app/category/[slug]/page.tsx
 import { PriceFilter } from "@/components/PriceFilter";
 import { ProductGrid } from "@/components/ProductGrid";
-import { getProductsByCategory } from "@/lib/products-cache";
+import { getProductsByCategoryPaginated } from "@/lib/products-cache"; // NUEVA función
 import { supabase } from "@/lib/supabase";
 
-export const revalidate = 21600; // 6 horas
+export const revalidate = 21600; //6 horas
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ sort?: string }>;
+  searchParams?: Promise<{ sort?: string; page?: string }>;
 }
+
+const PRODUCTS_PER_PAGE = 12; // NUEVO: definir constante
 
 export default async function CategoryPage({
   params,
@@ -18,6 +20,7 @@ export default async function CategoryPage({
   const { slug } = await params;
   const searchParamsObj = searchParams ? await searchParams : {};
   const sortOrder = (searchParamsObj.sort as "asc" | "desc" | "none") || "none";
+  const page = parseInt(searchParamsObj.page || "1"); // NUEVO: parámetro de página
 
   try {
     // 1. Obtener información de la categoría
@@ -39,12 +42,17 @@ export default async function CategoryPage({
       );
     }
 
-    // 2. Obtener productos de la categoría desde el caché
-    let products = await getProductsByCategory(slug);
+    // 2. Obtener productos PAGINADOS desde el caché (solo 12 por página)
+    const { products, totalProducts } = await getProductsByCategoryPaginated(
+      slug,
+      page,
+      PRODUCTS_PER_PAGE
+    );
 
-    // 3. Ordenar productos si es necesario
+    // 3. Ordenar productos si es necesario (solo los de esta página)
+    let sortedProducts = [...products];
     if (sortOrder !== "none") {
-      products = [...products].sort((a, b) => {
+      sortedProducts = sortedProducts.sort((a, b) => {
         if (sortOrder === "asc") {
           return a.price - b.price;
         } else {
@@ -52,6 +60,9 @@ export default async function CategoryPage({
         }
       });
     }
+
+    // Calcular total de páginas
+    const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -64,8 +75,8 @@ export default async function CategoryPage({
 
             <div className="flex items-center gap-4">
               <div className="text-sm text-gray-600">
-                {products.length} producto
-                {products.length !== 1 ? "s" : ""}
+                {totalProducts} producto
+                {totalProducts !== 1 ? "s" : ""}
               </div>
               <PriceFilter currentSort={sortOrder} />
             </div>
@@ -82,8 +93,17 @@ export default async function CategoryPage({
           )}
 
           {/* Grid de productos */}
-          {products.length > 0 ? (
-            <ProductGrid products={products} />
+          {sortedProducts.length > 0 ? (
+            <>
+              <ProductGrid
+                products={sortedProducts}
+                currentPage={page}
+                totalPages={totalPages}
+                basePath={`/category/${slug}`}
+                queryParams={{ sort: sortOrder }}
+                sortOrder={sortOrder}
+              />
+            </>
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg">

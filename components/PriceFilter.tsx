@@ -15,6 +15,9 @@ export function PriceFilter({ currentSort }: PriceFilterProps) {
   const handleSortChange = (value: "asc" | "desc" | "none") => {
     const params = new URLSearchParams(searchParams.toString());
 
+    // Resetear a página 1 cuando cambia el orden
+    params.set("page", "1");
+
     if (value === "none") {
       params.delete("sort");
     } else {
@@ -22,7 +25,7 @@ export function PriceFilter({ currentSort }: PriceFilterProps) {
     }
 
     // Usar router.push para navegación del lado del cliente
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   return (

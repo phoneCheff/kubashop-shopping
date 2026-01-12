@@ -5,7 +5,7 @@ import { ProductType } from "@/types/ProductType";
 // Cache en memoria (se resetea con cada deploy o recarga del servidor)
 let productsCache: ProductType[] | null = null;
 let cacheTimestamp: number = 0;
-const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 horas en milisegundos
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 horas
 
 export async function getAllActiveProducts(): Promise<ProductType[]> {
   const now = Date.now();
@@ -83,29 +83,67 @@ export async function refreshProductsCache(): Promise<void> {
   await getAllActiveProducts();
 }
 
-// Función para obtener productos por categoría
+// Función para obtener productos por categoría CON PAGINACIÓN
+export async function getProductsByCategoryPaginated(
+  slug: string,
+  page: number = 1,
+  perPage: number = 12
+): Promise<{ products: ProductType[]; totalProducts: number }> {
+  const allProducts = await getAllActiveProducts();
+
+  // Filtrar por categoría
+  const categoryProducts = allProducts.filter((product) =>
+    product.categories?.some((category) => category.slug === slug)
+  );
+
+  const totalProducts = categoryProducts.length;
+
+  // Calcular paginación
+  const startIndex = (page - 1) * perPage;
+  const endIndex = startIndex + perPage;
+  const paginatedProducts = categoryProducts.slice(startIndex, endIndex);
+
+  return {
+    products: paginatedProducts,
+    totalProducts,
+  };
+}
+
+// Función para obtener TODOS los productos de una categoría (sin paginar)
 export async function getProductsByCategory(
   slug: string
 ): Promise<ProductType[]> {
   const allProducts = await getAllActiveProducts();
-
   return allProducts.filter((product) =>
     product.categories?.some((category) => category.slug === slug)
   );
 }
 
-// Función para buscar productos
-export async function searchProducts(query: string): Promise<ProductType[]> {
+// Función para buscar productos CON PAGINACIÓN
+export async function searchProductsPaginated(
+  query: string,
+  page: number = 1,
+  perPage: number = 12
+): Promise<{ products: ProductType[]; total: number }> {
   const allProducts = await getAllActiveProducts();
   const normalizedQuery = query.toLowerCase().trim();
 
-  if (!normalizedQuery) return [];
+  if (!normalizedQuery) return { products: [], total: 0 };
 
-  return allProducts.filter(
+  const filteredProducts = allProducts.filter(
     (product) =>
       product.name.toLowerCase().includes(normalizedQuery) ||
       product.description?.toLowerCase().includes(normalizedQuery)
   );
+
+  const total = filteredProducts.length;
+  const startIndex = (page - 1) * perPage;
+  const endIndex = startIndex + perPage;
+
+  return {
+    products: filteredProducts.slice(startIndex, endIndex),
+    total,
+  };
 }
 
 // Función para limpiar el caché manualmente
