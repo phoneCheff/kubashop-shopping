@@ -150,6 +150,7 @@ export default function CartPage() {
                           width={50}
                           height={50}
                           className="object-cover w-full h-full"
+                          unoptimized={true}
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display =
                               "none";

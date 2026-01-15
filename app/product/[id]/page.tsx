@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Product = {
   id: string;
@@ -30,7 +30,7 @@ type Product = {
   link_images: { links: string[] };
 };
 
-// Parser que usa * como delimitador principal
+// Optimizar parser con mejor rendimiento
 function parseDescription(description: string): {
   features: Array<{ key: string; value: string }>;
   sections: Array<{
@@ -52,7 +52,8 @@ function parseDescription(description: string): {
 
   const featureRegex = /^([A-Za-záéíóúÁÉÍÓÚñÑüÜ\s\-]+):\s*(.+)$/;
 
-  parts.forEach((part, index) => {
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
     const cleanPart = part.replace(/\s+/g, " ").trim();
     const match = cleanPart.match(featureRegex);
 
@@ -73,17 +74,17 @@ function parseDescription(description: string): {
         content: cleanPart,
       });
     }
-  });
+  }
 
   return { features, sections };
 }
 
-// Componente para mostrar características destacadas
-function FeatureHighlight({
+// Componentes optimizados pero con tu diseño original
+const FeatureHighlight = ({
   features,
 }: {
   features: Array<{ key: string; value: string }>;
-}) {
+}) => {
   if (features.length === 0) return null;
 
   const highlightedFeatures = [
@@ -144,14 +145,13 @@ function FeatureHighlight({
       </div>
     </div>
   );
-}
+};
 
-// Componente para mostrar todas las características en una tabla
-function AllFeaturesTable({
+const AllFeaturesTable = ({
   features,
 }: {
   features: Array<{ key: string; value: string }>;
-}) {
+}) => {
   if (features.length === 0) return null;
 
   return (
@@ -187,11 +187,13 @@ function AllFeaturesTable({
       </div>
     </div>
   );
-}
+};
 
-// Componente principal que muestra todo el contenido
-function FormattedDescription({ description }: { description: string }) {
-  const { features, sections } = parseDescription(description);
+const FormattedDescription = ({ description }: { description: string }) => {
+  const { features, sections } = useMemo(
+    () => parseDescription(description),
+    [description]
+  );
 
   if (!description.trim()) {
     return (
@@ -200,9 +202,6 @@ function FormattedDescription({ description }: { description: string }) {
       </div>
     );
   }
-
-  const textSections = sections.filter((s) => s.type === "text");
-  const featureSections = sections.filter((s) => s.type === "feature");
 
   return (
     <div className="space-y-6">
@@ -239,7 +238,7 @@ function FormattedDescription({ description }: { description: string }) {
       </div>
     </div>
   );
-}
+};
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -247,9 +246,13 @@ export default function ProductDetailPage() {
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [isAdded, setIsAdded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
+
+    // Mostrar loader por un mínimo de tiempo para evitar parpadeo
+    const loadingTimeout = setTimeout(() => setIsLoading(false), 200);
 
     const stored = sessionStorage.getItem(`product_${id}`);
     if (stored) {
@@ -263,6 +266,8 @@ export default function ProductDetailPage() {
     } else {
       router.push("/");
     }
+
+    return () => clearTimeout(loadingTimeout);
   }, [id, router]);
 
   const handleAddToCart = () => {
@@ -280,10 +285,18 @@ export default function ProductDetailPage() {
     setTimeout(() => setIsAdded(false), 1000);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#002A8F]"></div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Cargando...
+        Producto no encontrado
       </div>
     );
   }
@@ -295,7 +308,7 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-24">
       <div className="container mx-auto px-4 py-6">
         <button
-          onClick={() => window.history.back()}
+          onClick={() => router.back()}
           className="flex items-center text-gray-700 hover:text-[#002A8F] mb-6 group transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform" />
@@ -321,7 +334,7 @@ export default function ProductDetailPage() {
               )}
 
               {images.length > 1 && (
-                <div className="flex gap-3 mt-6 overflow-x-auto pb-2 px-2">
+                <div className="flex gap-3 mt-6 overflow-x-auto pb-2 px-1 hide-scrollbar">
                   {images.slice(1).map((img, idx) => (
                     <div
                       key={idx}
@@ -333,6 +346,8 @@ export default function ProductDetailPage() {
                         width={96}
                         height={96}
                         className="object-cover w-full h-full"
+                        loading={idx > 2 ? "lazy" : "eager"} // Cargar las primeras imágenes inmediatamente
+                        unoptimized={true}
                       />
                     </div>
                   ))}

@@ -46,13 +46,20 @@ export function ProductCard({ product }: ProductCardProps) {
   // URL de la imagen principal (primera imagen)
   const mainImageUrl = allImages[0] || null;
 
-  // Función para optimizar URLs
-  const getOptimizedUrl = (url: string) => {
-    return url.includes("cloudinary.com") ? url : url;
-  };
+  const cloudinaryTransform = (
+    url: string,
+    {
+      width,
+      quality = "auto",
+      crop = "fill",
+    }: { width: number; quality?: string; crop?: string }
+  ) => {
+    if (!url.includes("cloudinary.com")) return url;
 
-  const getFullSizeUrl = (url: string) => {
-    return url.includes("cloudinary.com") ? url : url;
+    return url.replace(
+      "/upload/",
+      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`
+    );
   };
 
   // Función para cambiar de imagen en el carrusel
@@ -121,7 +128,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {mainImageUrl ? (
             <>
               <Image
-                src={getOptimizedUrl(mainImageUrl)}
+                src={cloudinaryTransform(mainImageUrl, { width: 400 })}
                 alt={product.name}
                 fill
                 className="object-cover cursor-pointer border-b-1 border-gray-500"
@@ -132,6 +139,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   (e.target as HTMLImageElement).style.display = "none";
                 }}
                 onClick={openImageModal}
+                unoptimized
               />
 
               {/* Indicador de múltiples imágenes */}
@@ -244,7 +252,10 @@ export function ProductCard({ product }: ProductCardProps) {
               {/* Imagen principal del carrusel */}
               <div className="relative border-b-2 border-black">
                 <Image
-                  src={getFullSizeUrl(allImages[currentImageIndex])}
+                  src={cloudinaryTransform(allImages[currentImageIndex], {
+                    width: 1000,
+                    quality: "auto",
+                  })}
                   alt={`${product.name} - Imagen ${currentImageIndex + 1} de ${
                     allImages.length
                   }`}
@@ -327,7 +338,10 @@ export function ProductCard({ product }: ProductCardProps) {
                       } overflow-hidden`}
                     >
                       <Image
-                        src={getOptimizedUrl(img)}
+                        src={cloudinaryTransform(img, {
+                          width: 80,
+                          quality: "60",
+                        })}
                         alt={`Miniatura ${index + 1}`}
                         width={64}
                         height={64}
