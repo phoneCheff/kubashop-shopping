@@ -274,6 +274,22 @@ export default function ProductDetailPage() {
       </div>
     );
 
+  const cloudinaryTransform = (
+    url: string,
+    {
+      width,
+      quality = "auto",
+      crop = "fill",
+    }: { width: number; quality?: string; crop?: string }
+  ) => {
+    if (!url.includes("cloudinary.com")) return url;
+
+    return url.replace(
+      "/upload/",
+      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`
+    );
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pb-24">
