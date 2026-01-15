@@ -1,17 +1,17 @@
 // app/category/[slug]/page.tsx
+import { CATEGORIES } from "@/components/NavBarData"; // Asegúrate de que esta ruta sea correcta
 import { PriceFilter } from "@/components/PriceFilter";
 import { ProductGrid } from "@/components/ProductGrid";
-import { getProductsByCategoryPaginated } from "@/lib/products-cache"; // NUEVA función
-import { supabase } from "@/lib/supabase";
+import { getProductsByCategoryPaginated } from "@/lib/products-cache";
 
-export const revalidate = 21600; //6 horas
+export const revalidate = 21600; // 6 horas
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
   searchParams?: Promise<{ sort?: string; page?: string }>;
 }
 
-const PRODUCTS_PER_PAGE = 12; // NUEVO: definir constante
+const PRODUCTS_PER_PAGE = 12;
 
 export default async function CategoryPage({
   params,
@@ -20,17 +20,13 @@ export default async function CategoryPage({
   const { slug } = await params;
   const searchParamsObj = searchParams ? await searchParams : {};
   const sortOrder = (searchParamsObj.sort as "asc" | "desc" | "none") || "none";
-  const page = parseInt(searchParamsObj.page || "1"); // NUEVO: parámetro de página
+  const page = parseInt(searchParamsObj.page || "1");
 
   try {
-    // 1. Obtener información de la categoría
-    const { data: categoryData, error: categoryError } = await supabase
-      .from("categories")
-      .select("id, name")
-      .eq("slug", slug)
-      .single();
+    // 1. Obtener información de la categoría desde CATEGORIES
+    const categoryData = CATEGORIES.find((cat) => cat.slug === slug);
 
-    if (categoryError || !categoryData) {
+    if (!categoryData) {
       return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
           <div className="max-w-7xl mx-auto">
@@ -42,14 +38,14 @@ export default async function CategoryPage({
       );
     }
 
-    // 2. Obtener productos PAGINADOS desde el caché (solo 12 por página)
+    // 2. Obtener productos PAGINADOS desde el caché
     const { products, totalProducts } = await getProductsByCategoryPaginated(
       slug,
       page,
       PRODUCTS_PER_PAGE
     );
 
-    // 3. Ordenar productos si es necesario (solo los de esta página)
+    // 3. Ordenar productos si es necesario
     let sortedProducts = [...products];
     if (sortOrder !== "none") {
       sortedProducts = sortedProducts.sort((a, b) => {
@@ -94,16 +90,14 @@ export default async function CategoryPage({
 
           {/* Grid de productos */}
           {sortedProducts.length > 0 ? (
-            <>
-              <ProductGrid
-                products={sortedProducts}
-                currentPage={page}
-                totalPages={totalPages}
-                basePath={`/category/${slug}`}
-                queryParams={{ sort: sortOrder }}
-                sortOrder={sortOrder}
-              />
-            </>
+            <ProductGrid
+              products={sortedProducts}
+              currentPage={page}
+              totalPages={totalPages}
+              basePath={`/category/${slug}`}
+              queryParams={{ sort: sortOrder }}
+              sortOrder={sortOrder}
+            />
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-600 text-lg">

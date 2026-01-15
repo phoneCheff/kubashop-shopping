@@ -141,6 +141,17 @@ export const CATEGORIES = [
     icon: "💼", // Alternativas: 🤝, 📋, 📄
     iconDark: "💵",
   },
+
+  /*
+    id: "15",
+    name: "Prueba",
+    slug: "prueba",
+    color:
+      "bg-gradient-to-r from-violet-100 to-purple-100 border border-violet-200 text-violet-700",
+    hoverColor: "hover:from-violet-200 hover:to-purple-200",
+    icon: "💼", // Alternativas: 🤝, 📋, 📄
+    iconDark: "💵",
+  */
 ] as const;
 
 // También puedes crear un array de colores para usar en gráficos o donde necesites
