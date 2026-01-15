@@ -103,6 +103,22 @@ export default function CartPage() {
     }, 300);
   };
 
+  const cloudinaryTransform = (
+    url: string,
+    {
+      width,
+      quality = "auto",
+      crop = "fill",
+    }: { width: number; quality?: string; crop?: string }
+  ) => {
+    if (!url.includes("cloudinary.com")) return url;
+
+    return url.replace(
+      "/upload/",
+      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24 flex items-center justify-center">
       <div className="container py-4">
@@ -145,7 +161,10 @@ export default function CartPage() {
                     <div className="relative w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
                       {item.image ? (
                         <Image
-                          src={item.image}
+                          src={cloudinaryTransform(item.image, {
+                            width: 80,
+                            quality: "60",
+                          })}
                           alt={item.name}
                           width={50}
                           height={50}

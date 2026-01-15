@@ -263,6 +263,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   height={600}
                   className="max-h-[70vh] w-auto mx-auto object-contain rounded-lg shadow-2xl"
                   priority
+                  unoptimized
                 />
 
                 {/* Controles de navegación (solo si hay más de 1 imagen) */}
@@ -346,6 +347,7 @@ export function ProductCard({ product }: ProductCardProps) {
                         width={64}
                         height={64}
                         className="object-cover w-full h-full"
+                        unoptimized
                       />
                     </button>
                   ))}
