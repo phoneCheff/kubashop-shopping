@@ -142,7 +142,7 @@ export const CATEGORIES = [
     iconDark: "💵",
   },
 
-  /*
+  /*{
     id: "15",
     name: "Prueba",
     slug: "prueba",
@@ -151,7 +151,7 @@ export const CATEGORIES = [
     hoverColor: "hover:from-violet-200 hover:to-purple-200",
     icon: "💼", // Alternativas: 🤝, 📋, 📄
     iconDark: "💵",
-  */
+ }, */
 ] as const;
 
 // También puedes crear un array de colores para usar en gráficos o donde necesites

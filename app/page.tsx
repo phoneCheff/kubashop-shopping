@@ -269,7 +269,8 @@ export default function Home() {
 
       <div className="min-h-screen bg-gray-50">
         {/* Hero section */}
-        <section className="bg-gradient-to-r from-[#002A8F] to-[#1E40AF] py-12 px-4 text-center">
+        {/* Hero section */}
+        <section className="bg-gradient-to-r from-[#002A8F] to-[#1E40AF] py-12 px-4 text-center text-base">
           <div className="max-w-md mx-auto">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
               KubaShop

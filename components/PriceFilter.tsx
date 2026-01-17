@@ -1,32 +1,38 @@
-// components/PriceFilter.tsx
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { memo, useCallback } from "react";
 
 interface PriceFilterProps {
   currentSort: "asc" | "desc" | "none";
 }
 
-export function PriceFilter({ currentSort }: PriceFilterProps) {
+export const PriceFilter = memo(function PriceFilter({
+  currentSort,
+}: PriceFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const handleSortChange = (value: "asc" | "desc" | "none") => {
-    const params = new URLSearchParams(searchParams.toString());
+  // Optimización: useCallback para evitar recreación
+  const handleSortChange = useCallback(
+    (value: "asc" | "desc" | "none") => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    // Resetear a página 1 cuando cambia el orden
-    params.set("page", "1");
+      // Resetear a página 1 cuando cambia el orden
+      params.set("page", "1");
 
-    if (value === "none") {
-      params.delete("sort");
-    } else {
-      params.set("sort", value);
-    }
+      if (value === "none") {
+        params.delete("sort");
+      } else {
+        params.set("sort", value);
+      }
 
-    // Usar router.push para navegación del lado del cliente
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  };
+      // Usar router.push para navegación del lado del cliente
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
 
   return (
     <div className="relative">
@@ -56,4 +62,4 @@ export function PriceFilter({ currentSort }: PriceFilterProps) {
       </div>
     </div>
   );
-}
+});

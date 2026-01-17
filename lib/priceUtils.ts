@@ -19,8 +19,34 @@ export function calculateRoundedPrice(basePrice: number, coin: string): number {
       montoAdicional = 30;
     }
   } else if (coin === "CUP") {
-    if (montoAdicional > 100) {
-      montoAdicional = 100;
+    switch (true) {
+      case basePrice < 500:
+        montoAdicional = 50;
+        break;
+      case basePrice < 800 && basePrice > 500:
+        montoAdicional = 100; // Ajusta este valor según necesites
+        break;
+      case basePrice < 1200 && basePrice > 800:
+        montoAdicional = 150; // Ajusta este valor según necesites
+        break;
+      case basePrice < 2000 && basePrice > 1200:
+        montoAdicional = 200; // Ajusta este valor según necesites
+        break;
+      case basePrice < 4000 && basePrice > 2000:
+        montoAdicional = 500; // Ajusta este valor según necesites
+        break;
+      case basePrice < 8000 && basePrice > 4000:
+        montoAdicional = 750; // Ajusta este valor según necesites
+        break;
+      case basePrice < 15000 && basePrice > 8000:
+        montoAdicional = 1000; // Ajusta este valor según necesites
+        break;
+      case basePrice > 15000:
+        montoAdicional = 2000; // Ajusta este valor según necesites
+        break;
+      default:
+        montoAdicional = 200; // Valor por defecto para precios más altos
+        break;
     }
   }
 

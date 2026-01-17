@@ -1,20 +1,20 @@
-// components/ProductGrid.tsx
 "use client";
 
 import { ProductType } from "@/types/ProductType";
 import { useRouter, useSearchParams } from "next/navigation";
+import { memo, useCallback, useMemo } from "react";
 import { ProductCard } from "./ProductCard";
 
 interface ProductGridProps {
   products: ProductType[];
   currentPage: number;
   totalPages: number;
-  basePath: string; // Nuevo: ruta base (/category/slug o /search)
-  queryParams: Record<string, string>; // Nuevo: parámetros de consulta
+  basePath: string;
+  queryParams: Record<string, string>;
   sortOrder: string;
 }
 
-export function ProductGrid({
+export const ProductGrid = memo(function ProductGrid({
   products,
   currentPage,
   totalPages,
@@ -25,30 +25,65 @@ export function ProductGrid({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+  // Optimización: useCallback para handlers
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    // Mantener todos los parámetros actuales
-    Object.entries(queryParams).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, value);
-      }
-    });
+      // Mantener todos los parámetros actuales
+      Object.entries(queryParams).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        }
+      });
 
-    // Actualizar página
-    params.set("page", newPage.toString());
+      // Actualizar página
+      params.set("page", newPage.toString());
 
-    // Navegar a la nueva URL
-    router.push(`${basePath}?${params.toString()}`, { scroll: false });
+      // Navegar a la nueva URL
+      router.push(`${basePath}?${params.toString()}`, { scroll: false });
 
-    // Opcional: Scroll suave al inicio de los productos
-    setTimeout(() => {
+      // Scroll suave al inicio
       const productsElement = document.getElementById("productos-grid");
       if (productsElement) {
-        productsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => {
+          productsElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 100);
       }
-    }, 100);
-  };
+    },
+    [basePath, queryParams, router, searchParams]
+  );
+
+  // Optimización: memoizar números de página visibles
+  const visiblePageNumbers = useMemo(() => {
+    if (totalPages <= 1) return [];
+
+    const pageCount = Math.min(5, totalPages);
+    const pages: number[] = [];
+
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else if (currentPage <= 3) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i);
+      }
+    } else if (currentPage >= totalPages - 2) {
+      for (let i = totalPages - 4; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  }, [currentPage, totalPages]);
 
   return (
     <>
@@ -83,33 +118,19 @@ export function ProductGrid({
 
             {/* Indicadores de página */}
             <div className="flex gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number;
-
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors ${
-                      currentPage === pageNum
-                        ? "bg-[#002A8F] text-white"
-                        : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+              {visiblePageNumbers.map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-lg font-medium transition-colors ${
+                    currentPage === pageNum
+                      ? "bg-[#002A8F] text-white"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
             </div>
 
             <button
@@ -124,4 +145,4 @@ export function ProductGrid({
       )}
     </>
   );
-}
+});

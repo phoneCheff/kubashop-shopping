@@ -1,7 +1,7 @@
-// components/Pagination.tsx (nuevo componente)
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -23,21 +23,57 @@ export function Pagination({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
+  // Optimización: useCallback para evitar recreación en cada render
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    // Mantener todos los parámetros existentes
-    Object.entries(queryParams).forEach(([key, value]) => {
-      params.set(key, value);
-    });
+      // Mantener todos los parámetros existentes
+      Object.entries(queryParams).forEach(([key, value]) => {
+        params.set(key, value);
+      });
 
-    params.set("page", page.toString());
+      params.set("page", page.toString());
 
-    router.push(`${basePath}?${params.toString()}`);
-  };
+      router.push(`${basePath}?${params.toString()}`);
+    },
+    [basePath, queryParams, router, searchParams]
+  );
 
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+  // Optimización: memoizar cálculos
+  const { startItem, endItem } = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, totalItems);
+    return { startItem: start, endItem: end };
+  }, [currentPage, itemsPerPage, totalItems]);
+
+  // Optimización: memoizar números de página visibles
+  const visiblePageNumbers = useMemo(() => {
+    if (totalPages <= 1) return [];
+
+    const pageCount = Math.min(5, totalPages);
+    const pages: number[] = [];
+
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else if (currentPage <= 3) {
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i);
+      }
+    } else if (currentPage >= totalPages - 2) {
+      for (let i = totalPages - 4; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  }, [currentPage, totalPages]);
 
   if (totalPages <= 1) return null;
 
@@ -64,33 +100,19 @@ export function Pagination({
 
         {/* Páginas */}
         <div className="flex items-center gap-1">
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum: number;
-
-            if (totalPages <= 5) {
-              pageNum = i + 1;
-            } else if (currentPage <= 3) {
-              pageNum = i + 1;
-            } else if (currentPage >= totalPages - 2) {
-              pageNum = totalPages - 4 + i;
-            } else {
-              pageNum = currentPage - 2 + i;
-            }
-
-            return (
-              <button
-                key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
-                className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg font-medium transition-colors ${
-                  currentPage === pageNum
-                    ? "bg-[#002A8F] text-white"
-                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
+          {visiblePageNumbers.map((pageNum) => (
+            <button
+              key={pageNum}
+              onClick={() => handlePageChange(pageNum)}
+              className={`w-8 h-8 flex items-center justify-center text-sm rounded-lg font-medium transition-colors ${
+                currentPage === pageNum
+                  ? "bg-[#002A8F] text-white"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {pageNum}
+            </button>
+          ))}
 
           {totalPages > 5 && currentPage < totalPages - 2 && (
             <>

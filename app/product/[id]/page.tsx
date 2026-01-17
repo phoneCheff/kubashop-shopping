@@ -247,6 +247,7 @@ export default function ProductDetailPage() {
       priceWithMargin: product.priceWithMargin,
       image: product.link_images?.links?.[0] || null,
       custom_slug: product.custom_slug,
+      quantity: 0,
     });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1000);

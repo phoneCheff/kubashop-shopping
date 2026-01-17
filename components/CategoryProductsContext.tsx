@@ -1,7 +1,12 @@
-// components/CategoryProductsContext.tsx
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 export type ProductType = {
   id: string;
@@ -31,14 +36,36 @@ export function CategoryProductsProvider({
 }) {
   const [products, setProducts] = useState<ProductType[] | null>(null);
 
-  const getProductById = (id: string) => {
-    return products?.find((p) => p.id === id);
-  };
+  // Optimización: crear índice para búsqueda rápida
+  const productIndex = useMemo(() => {
+    if (!products) return new Map<string, ProductType>();
+
+    const index = new Map<string, ProductType>();
+    products.forEach((product) => {
+      index.set(product.id, product);
+    });
+    return index;
+  }, [products]);
+
+  // Optimización: useCallback para función estable
+  const getProductById = useCallback(
+    (id: string) => {
+      return productIndex.get(id);
+    },
+    [productIndex]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      products,
+      setProducts,
+      getProductById,
+    }),
+    [products, getProductById]
+  );
 
   return (
-    <CategoryProductsContext.Provider
-      value={{ products, setProducts, getProductById }}
-    >
+    <CategoryProductsContext.Provider value={contextValue}>
       {children}
     </CategoryProductsContext.Provider>
   );

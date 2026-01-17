@@ -1,8 +1,14 @@
-// components/CartProvider.tsx
 "use client";
 
 import { calculateRoundedPrice } from "@/lib/priceUtils";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type CartItem = {
   id: string;
@@ -18,17 +24,9 @@ type CartItem = {
 type CartContextType = {
   items: CartItem[];
   myPhone: number;
-  addToCart: (product: {
-    id: string;
-    name: string;
-    price: number;
-    coin: string;
-    priceWithMargin: number;
-    custom_slug: string;
-    image: string | null;
-  }) => void;
+  addToCart: (product: CartItem) => void;
   removeFromCart: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void; // ✅ Nueva función
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getWhatsAppLink: () => string;
@@ -40,18 +38,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const myPhone = 63115599;
 
-  // Cargar desde localStorage al iniciar
+  // Optimización: cargar desde localStorage solo en cliente
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const savedCart = localStorage.getItem("kubashop-cart");
     if (savedCart) {
       try {
-        const parsed = JSON.parse(savedCart);
-        // Asegurarnos de que todos los items tengan `priceWithMargin` (por si viene de versión anterior)
-        const withMargin = parsed.map((item: any) => ({
-          ...item,
-          priceWithMargin: item.priceWithMargin ?? item.price * 1.1,
-        }));
-        setItems(withMargin);
+        // Parsear solo una vez y usar JSON.parse con reviver
+        const parsed = JSON.parse(savedCart, (key, value) => {
+          // Optimizar: convertir directamente con validación
+          if (key === "priceWithMargin" && value === null) {
+            return value * 1.1;
+          }
+          return value;
+        });
+
+        // Usar setItems directo sin transformación adicional
+        setItems(parsed);
       } catch (e) {
         console.error("Error parsing cart from localStorage", e);
         setItems([]);
@@ -59,29 +63,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Guardar en localStorage cuando cambie el carrito
+  // Optimización: debounce para guardar en localStorage
   useEffect(() => {
-    localStorage.setItem("kubashop-cart", JSON.stringify(items));
+    if (typeof window === "undefined" || items.length === 0) return;
+
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem("kubashop-cart", JSON.stringify(items));
+    }, 500); // Debounce de 500ms
+
+    return () => clearTimeout(timeoutId);
   }, [items]);
 
-  const addToCart = (product: {
-    id: string;
-    name: string;
-    price: number;
-    coin: string;
-    priceWithMargin: number;
-    custom_slug: string;
-    image: string | null;
-  }) => {
+  // Optimización: useCallback para funciones estables
+  const addToCart = useCallback((product: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
-      const existingItem = prev.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+      const existingIndex = prev.findIndex((item) => item.id === product.id);
+
+      if (existingIndex > -1) {
+        // Actualizar directamente sin crear nuevo array completo
+        const newItems = [...prev];
+        newItems[existingIndex] = {
+          ...newItems[existingIndex],
+          quantity: newItems[existingIndex].quantity + 1,
+        };
+        return newItems;
       }
+
       return [
         ...prev,
         {
@@ -92,82 +99,102 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
       ];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  const removeFromCart = useCallback((id: string) => {
+    setItems((prev) => {
+      const index = prev.findIndex((item) => item.id === id);
+      if (index === -1) return prev;
 
-  // ✅ Nueva función: actualizar cantidad
-  const updateQuantity = (id: string, quantity: number) => {
-    if (quantity < 1) return; // Evita cantidades no válidas
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
-  };
+      // Crear nuevo array solo si hay cambios
+      return prev.filter((item) => item.id !== id);
+    });
+  }, []);
 
-  const clearCart = () => {
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    if (quantity < 1) return;
+
+    setItems((prev) => {
+      const index = prev.findIndex((item) => item.id === id);
+      if (index === -1) return prev;
+
+      // Optimización: actualizar solo el item necesario
+      if (prev[index].quantity === quantity) return prev;
+
+      const newItems = [...prev];
+      newItems[index] = { ...newItems[index], quantity };
+      return newItems;
+    });
+  }, []);
+
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
-  const getTotalItems = () => {
+  // Optimización: memoizar cálculos costosos
+  const totalItems = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
-  };
+  }, [items]);
 
-  const getWhatsAppLink = () => {
+  const getTotalItems = useCallback(() => totalItems, [totalItems]);
+
+  const getWhatsAppLink = useCallback(() => {
     if (items.length === 0) return "";
 
-    // Agrupar productos por vendedor (phone)
-    const vendors = items.reduce((acc, item) => {
-      if (!acc[item.id]) {
-        acc[item.id] = [];
-      }
-      acc[item.id].push(item);
-      return acc;
-    }, {} as Record<string, CartItem[]>);
+    // Optimización: usar Map en lugar de reduce para agrupación
+    const productMap = new Map<string, CartItem[]>();
 
-    // Crear mensaje para cada vendedor
-    const messages = Object.entries(vendors).map(([phone, products]) => {
-      const productList = products
-        .map(
-          (p) =>
-            `• ${p.name} (x${p.quantity}) - $${(p.price * p.quantity).toFixed(
-              2
-            )}`
-        )
-        .join("\n");
-
-      const total = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-
-      return {
-        myPhone,
-        message: `¡Hola! Quisiera comprar:\n\n${productList}\n\nTotal: $${total.toFixed(
-          2
-        )}`,
-      };
+    items.forEach((item) => {
+      const current = productMap.get(item.id) || [];
+      productMap.set(item.id, [...current, item]);
     });
 
-    // ✅ Corregido: eliminar espacios en la URL de WhatsApp
-    return `https://wa.me/${messages[0].myPhone}?text=${encodeURIComponent(
-      messages[0].message
-    )}`;
-  };
+    // Optimización: calcular mensaje eficientemente
+    let message = "¡Hola! Quisiera comprar:\n\n";
+    let total = 0;
+
+    productMap.forEach((products, productId) => {
+      const product = products[0]; // Todos son el mismo producto
+      const quantity = products.reduce((sum, p) => sum + p.quantity, 0);
+      const productTotal = product.price * quantity;
+
+      message += `• ${product.name} (x${quantity}) - $${productTotal.toFixed(
+        2
+      )}\n`;
+      total += productTotal;
+    });
+
+    message += `\nTotal: $${total.toFixed(2)}`;
+
+    return `https://wa.me/${myPhone}?text=${encodeURIComponent(message)}`;
+  }, [items, myPhone]);
+
+  // Optimización: memoizar el contexto completo
+  const contextValue = useMemo(
+    () => ({
+      items,
+      myPhone,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      getTotalItems,
+      getWhatsAppLink,
+    }),
+    [
+      items,
+      myPhone,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      getTotalItems,
+      getWhatsAppLink,
+    ]
+  );
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        myPhone,
-        addToCart,
-        removeFromCart,
-        updateQuantity, // ✅ Exportada
-        clearCart,
-        getTotalItems,
-        getWhatsAppLink,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+    <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>
   );
 }
 
