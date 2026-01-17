@@ -342,7 +342,7 @@ export const ProductCard = memo(
 
             <div className="flex justify-between items-center mb-2">
               <span className="text-[#002A8F] font-bold text-lg">
-                {product.price}-{calculatedPrice} {product.coin}
+                {calculatedPrice} {product.coin}
               </span>
             </div>
 
