@@ -103,7 +103,7 @@ export function Navbar() {
           {link.name}
         </Link>
       )),
-    [pathname]
+    [pathname],
   );
 
   const mobileCategories = useMemo(
@@ -120,7 +120,7 @@ export function Navbar() {
           <span className="font-medium text-sm">{cat.name}</span>
         </Link>
       )),
-    [closeMenu]
+    [closeMenu],
   );
 
   const desktopCategories = useMemo(
@@ -142,7 +142,7 @@ export function Navbar() {
           {cat.name}
         </Link>
       )),
-    [activeCategory, pathname]
+    [activeCategory, pathname],
   );
 
   return (
@@ -171,7 +171,7 @@ export function Navbar() {
                     sizes="(max-width: 768px) 48px, 56px"
                     priority={true}
                     className="object-contain"
-                    quality={100}
+                    quality={75}
                     style={{ transform: "translateZ(0)" }}
                   />
                 </div>

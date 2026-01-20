@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -36,51 +37,91 @@ const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   const myPhone = 63115599;
+  const isSavingRef = useRef(false);
 
-  // Optimización: cargar desde localStorage solo en cliente
+  // Cargar desde localStorage solo al inicio
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const savedCart = localStorage.getItem("kubashop-cart");
-    if (savedCart) {
-      try {
-        // Parsear solo una vez y usar JSON.parse con reviver
-        const parsed = JSON.parse(savedCart, (key, value) => {
-          // Optimizar: convertir directamente con validación
-          if (key === "priceWithMargin" && value === null) {
-            return value * 1.1;
-          }
-          return value;
-        });
-
-        // Usar setItems directo sin transformación adicional
-        setItems(parsed);
-      } catch (e) {
-        console.error("Error parsing cart from localStorage", e);
-        setItems([]);
+    try {
+      const savedCart = localStorage.getItem("kubashop-cart");
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        // Validar que sea un array
+        if (Array.isArray(parsed)) {
+          // Asegurar que todos los items tengan los campos requeridos
+          const validatedItems = parsed.map((item) => ({
+            ...item,
+            priceWithMargin:
+              item.priceWithMargin ||
+              calculateRoundedPrice(item.price, item.coin),
+            image: item.image || null,
+            quantity: item.quantity || 1,
+          }));
+          setItems(validatedItems);
+        } else {
+          console.warn("Cart data is not an array, resetting cart");
+          localStorage.removeItem("kubashop-cart");
+          setItems([]);
+        }
       }
+    } catch (e) {
+      console.error("Error parsing cart from localStorage", e);
+      localStorage.removeItem("kubashop-cart");
+      setItems([]);
+    } finally {
+      setIsInitialized(true);
     }
   }, []);
 
-  // Optimización: debounce para guardar en localStorage
+  // Guardar en localStorage inmediatamente cuando cambien los items
   useEffect(() => {
-    if (typeof window === "undefined" || items.length === 0) return;
+    if (typeof window === "undefined" || !isInitialized || isSavingRef.current)
+      return;
 
-    const timeoutId = setTimeout(() => {
+    isSavingRef.current = true;
+
+    try {
       localStorage.setItem("kubashop-cart", JSON.stringify(items));
-    }, 500); // Debounce de 500ms
+    } catch (error) {
+      console.error("Error saving cart to localStorage", error);
+    } finally {
+      isSavingRef.current = false;
+    }
+  }, [items, isInitialized]);
 
-    return () => clearTimeout(timeoutId);
-  }, [items]);
+  // Sincronizar entre pestañas
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  // Optimización: useCallback para funciones estables
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "kubashop-cart") {
+        try {
+          if (e.newValue) {
+            const parsed = JSON.parse(e.newValue);
+            if (Array.isArray(parsed)) {
+              setItems(parsed);
+            }
+          } else {
+            setItems([]);
+          }
+        } catch (error) {
+          console.error("Error parsing cart from storage event", error);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   const addToCart = useCallback((product: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.id === product.id);
 
       if (existingIndex > -1) {
-        // Actualizar directamente sin crear nuevo array completo
         const newItems = [...prev];
         newItems[existingIndex] = {
           ...newItems[existingIndex],
@@ -103,11 +144,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = useCallback((id: string) => {
     setItems((prev) => {
-      const index = prev.findIndex((item) => item.id === id);
-      if (index === -1) return prev;
+      const newItems = prev.filter((item) => item.id !== id);
 
-      // Crear nuevo array solo si hay cambios
-      return prev.filter((item) => item.id !== id);
+      // Si el carrito queda vacío, limpiar localStorage inmediatamente
+      if (newItems.length === 0 && typeof window !== "undefined") {
+        localStorage.removeItem("kubashop-cart");
+      }
+
+      return newItems;
     });
   }, []);
 
@@ -118,7 +162,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const index = prev.findIndex((item) => item.id === id);
       if (index === -1) return prev;
 
-      // Optimización: actualizar solo el item necesario
       if (prev[index].quantity === quantity) return prev;
 
       const newItems = [...prev];
@@ -128,10 +171,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => {
-    setItems([]);
-  }, []);
+    // Limpiar localStorage inmediatamente
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("kubashop-cart");
+      // Disparar evento para sincronizar otras pestañas
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "kubashop-cart",
+          newValue: null,
+          oldValue: JSON.stringify(items),
+          storageArea: localStorage,
+        }),
+      );
+    }
 
-  // Optimización: memoizar cálculos costosos
+    // Limpiar el estado
+    setItems([]);
+  }, [items]);
+
   const totalItems = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
   }, [items]);
@@ -141,7 +198,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const getWhatsAppLink = useCallback(() => {
     if (items.length === 0) return "";
 
-    // Optimización: usar Map en lugar de reduce para agrupación
     const productMap = new Map<string, CartItem[]>();
 
     items.forEach((item) => {
@@ -149,18 +205,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       productMap.set(item.id, [...current, item]);
     });
 
-    // Optimización: calcular mensaje eficientemente
     let message = "¡Hola! Quisiera comprar:\n\n";
     let total = 0;
 
     productMap.forEach((products, productId) => {
-      const product = products[0]; // Todos son el mismo producto
+      const product = products[0];
       const quantity = products.reduce((sum, p) => sum + p.quantity, 0);
       const productTotal = product.price * quantity;
 
-      message += `• ${product.name} (x${quantity}) - $${productTotal.toFixed(
-        2
-      )}\n`;
+      message += `• ${product.name} (x${quantity}) - $${productTotal.toFixed(2)}\n`;
       total += productTotal;
     });
 
@@ -169,7 +222,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return `https://wa.me/${myPhone}?text=${encodeURIComponent(message)}`;
   }, [items, myPhone]);
 
-  // Optimización: memoizar el contexto completo
   const contextValue = useMemo(
     () => ({
       items,
@@ -190,7 +242,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearCart,
       getTotalItems,
       getWhatsAppLink,
-    ]
+    ],
   );
 
   return (
