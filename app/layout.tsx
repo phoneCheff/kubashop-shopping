@@ -11,9 +11,20 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "KubaShop ",
-  description: "Tienda online con productos de diferentes vendedores",
+  description:
+    "Compra ropa, zapatos, electrónica, motos y más en KubaShop. Tu tienda online con productos variados.",
   icons: {
     icon: "/icon.ico", // ← apunta a tu archivo
+  },
+  keywords:
+    "tienda online cuba, comprar en cuba, ropa cuba, zapatos cuba, electrodomésticos cuba, motos cuba, laptops cuba, ferretería cuba",
+  openGraph: {
+    title: "KubaShop Tienda online",
+    description: "Tienda online con productos de diferentes vendedores",
+    images: ["/web-app-manifest-512x512.png"],
+    siteName: "KubaShop",
+    locale: "es_ES",
+    type: "website",
   },
 };
 
@@ -27,6 +38,10 @@ export default function RootLayout({
       <head>
         {/* Favicon clásico */}
         {/* Favicon SVG (opcional, moderno) */}
+        <meta
+          name="google-site-verification"
+          content="google50852b768ee95a87"
+        />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" sizes="any" />
         {/* Apple Touch Icon */}
         <link

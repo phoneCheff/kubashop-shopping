@@ -42,7 +42,7 @@ export default async function CategoryPage({
     const { products, totalProducts } = await getProductsByCategoryPaginated(
       slug,
       page,
-      PRODUCTS_PER_PAGE
+      PRODUCTS_PER_PAGE,
     );
 
     // 3. Ordenar productos si es necesario
@@ -66,7 +66,7 @@ export default async function CategoryPage({
           {/* Encabezado con título y filtro */}
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
             <h1 className="text-2xl font-bold text-[#002A8F] capitalize">
-              {categoryData.name}
+              Comprar {categoryData.name} en KubaShop - Tienda Online
             </h1>
 
             <div className="flex items-center gap-4">

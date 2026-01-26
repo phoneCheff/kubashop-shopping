@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://kubashop.vercel.app/sitemap.xml
+Disallow: /private/

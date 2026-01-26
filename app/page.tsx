@@ -32,38 +32,66 @@ function TutorialGuide() {
       target: "categorias",
     },
     {
-      title: "2. Busca productos",
+      title: "2. Ofertas🤩",
+      description:
+        "Podemos ajustarnos en algunos precios y hacerle una oferta si compra varios productos",
+      image: "🔎",
+      target: null,
+    },
+    {
+      title: "3. Busca productos",
       description:
         "Utiliza la barra de busqueda para encontrar los que necesitas de forma rapida",
       image: "🔎",
       target: null,
     },
     {
-      title: "3. Agrega productos al carrito",
+      title: "4. Agrega productos al carrito",
       description:
         "Haz clic en 'Agregar al carrito' en cualquier producto que te interese.",
       image: "🛒",
       target: null,
     },
     {
-      title: "4. Ver detalles del producto",
+      title: "5. Ver detalles del producto",
       description:
         "Haz clic en 'Ver más detalles' para ver especificaciones completas.",
       image: "🔍",
       target: null,
     },
     {
-      title: "5. Revisa tu carrito",
+      title: "6. Tienes dudas?",
+      description:
+        "Si tienes dudas sobre cualquier producto agregalo al carrito y consulta con nosotros",
+      image: "👀",
+      target: null,
+    },
+    {
+      title: "7. Acerca de los productos",
+      description:
+        "Para algunos productos siempre debe consultar con nosotros sobre las tallas, colores y numeros disponibles",
+      image: "🗣️",
+      target: null,
+    },
+
+    {
+      title: "8. Revisa tu carrito",
       description:
         "Accede al carrito para ver todos los productos seleccionados.",
       image: "📋",
       target: null,
     },
     {
-      title: "6. Envía tu pedido por WhatsApp",
+      title: "9. Envía tu pedido por WhatsApp",
       description:
         "Finaliza tu compra enviando el pedido directamente por WhatsApp.",
       image: "📱",
+      target: null,
+    },
+    {
+      title: "10. No dude en escribirnos",
+      description: "Siempre sera un placer atenderle😊",
+      image: "🔎",
       target: null,
     },
   ];
