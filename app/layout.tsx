@@ -40,7 +40,7 @@ export default function RootLayout({
         {/* Favicon SVG (opcional, moderno) */}
         <meta
           name="google-site-verification"
-          content="google50852b768ee95a87"
+          content="CWmiYo1BUCdEUr5TrwiSt0xdj8xgZtBJerdKZaUVeYs"
         />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" sizes="any" />
         {/* Apple Touch Icon */}
