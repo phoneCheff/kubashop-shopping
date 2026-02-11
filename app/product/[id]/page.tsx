@@ -28,6 +28,7 @@ type Product = {
   gender: string | null;
   custom_slug: string;
   link_images: { links: string[] };
+  comision_fija: number;
 };
 
 // Función para parsear la descripción en features y secciones
@@ -94,8 +95,8 @@ const FeatureHighlight = ({
         {features
           .filter((f) =>
             highlightedFeatures.some((hf) =>
-              f.key.toLowerCase().includes(hf.toLowerCase())
-            )
+              f.key.toLowerCase().includes(hf.toLowerCase()),
+            ),
           )
           .slice(0, 6)
           .map((feature, idx) => (
@@ -171,7 +172,7 @@ const FeatureHighlight = ({
 const FormattedDescription = ({ description }: { description: string }) => {
   const { features, sections } = useMemo(
     () => parseDescription(description),
-    [description]
+    [description],
   );
 
   if (!description.trim())
@@ -208,7 +209,7 @@ const FormattedDescription = ({ description }: { description: string }) => {
                 {section.content as string}
               </div>
             </div>
-          )
+          ),
         )}
       </div>
     </div>
@@ -248,6 +249,7 @@ export default function ProductDetailPage() {
       image: product.link_images?.links?.[0] || null,
       custom_slug: product.custom_slug,
       quantity: 0,
+      comision_fija: product.comision_fija,
     });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1000);
@@ -281,13 +283,13 @@ export default function ProductDetailPage() {
       width,
       quality = "auto",
       crop = "fill",
-    }: { width: number; quality?: string; crop?: string }
+    }: { width: number; quality?: string; crop?: string },
   ) => {
     if (!url.includes("cloudinary.com")) return url;
 
     return url.replace(
       "/upload/",
-      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`
+      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`,
     );
   };
 
@@ -359,7 +361,11 @@ export default function ProductDetailPage() {
                 {product.name}
               </h1>
               <p className="text-4xl font-bold text-[#002A8F] mb-6">
-                {calculateRoundedPrice(product.price, product.coin)}{" "}
+                {calculateRoundedPrice(
+                  product.price,
+                  product.coin,
+                  product.comision_fija,
+                )}{" "}
                 {product.coin}
               </p>
 

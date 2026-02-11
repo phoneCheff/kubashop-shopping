@@ -14,4 +14,5 @@ export type ProductType = {
     id: string;
     slug: string;
   }>;
+  comision_fija: number;
 };

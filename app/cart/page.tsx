@@ -17,17 +17,24 @@ export default function CartPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // 🧮 Agrupar por moneda (item.coin)
-  const groupedByCoin = items.reduce((acc, item) => {
-    const coin = item.coin || "USD";
-    if (!acc[coin]) {
-      acc[coin] = { items: [], subtotal: 0 };
-    }
-    const priceWithMargin = calculateRoundedPrice(item.price, item.coin);
-    const lineTotal = priceWithMargin * item.quantity;
-    acc[coin].items.push({ ...item, priceWithMargin });
-    acc[coin].subtotal += lineTotal;
-    return acc;
-  }, {} as Record<string, { items: typeof items; subtotal: number }>);
+  const groupedByCoin = items.reduce(
+    (acc, item) => {
+      const coin = item.coin || "USD";
+      if (!acc[coin]) {
+        acc[coin] = { items: [], subtotal: 0 };
+      }
+      const priceWithMargin = calculateRoundedPrice(
+        item.price,
+        item.coin,
+        item.comision_fija,
+      );
+      const lineTotal = priceWithMargin * item.quantity;
+      acc[coin].items.push({ ...item, priceWithMargin });
+      acc[coin].subtotal += lineTotal;
+      return acc;
+    },
+    {} as Record<string, { items: typeof items; subtotal: number }>,
+  );
 
   // ✉️ Generar mensaje de WhatsApp con todas las monedas
   const generateWhatsAppMessage = () => {
@@ -41,7 +48,8 @@ export default function CartPage() {
         if (item.custom_slug) {
           const partes = item.custom_slug.split("-");
           const comision_extra =
-            calculateRoundedPrice(item.price, item.coin) - Number(partes[2]);
+            calculateRoundedPrice(item.price, item.coin, item.comision_fija) -
+            Number(partes[2]);
           const comision_final = Number(partes[3]) + comision_extra;
 
           // clientId-categoryId-priceID-comisionFija-safeName-timestamp
@@ -57,11 +65,11 @@ export default function CartPage() {
         }
 
         message += ` x${item.quantity} → ${item.priceWithMargin.toFixed(
-          2
+          2,
         )} ${coin}\n`;
       });
       message += `\nSubtotal en ${coin}: ${group.subtotal.toFixed(
-        2
+        2,
       )} ${coin}\n\n`;
     });
 
@@ -109,13 +117,13 @@ export default function CartPage() {
       width,
       quality = "auto",
       crop = "fill",
-    }: { width: number; quality?: string; crop?: string }
+    }: { width: number; quality?: string; crop?: string },
   ) => {
     if (!url.includes("cloudinary.com")) return url;
 
     return url.replace(
       "/upload/",
-      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`
+      `/upload/f_auto,q_${quality},c_${crop},w_${width}/`,
     );
   };
 
@@ -187,7 +195,11 @@ export default function CartPage() {
                         <div className="flex flex-col">
                           {/* Precio unitario */}
                           <span className="text-[#002A8F] font-bold text-lg">
-                            {calculateRoundedPrice(item.price, item.coin)}{" "}
+                            {calculateRoundedPrice(
+                              item.price,
+                              item.coin,
+                              item.comision_fija,
+                            )}{" "}
                             {item.coin}
                           </span>
                           {/* Controles de cantidad */}

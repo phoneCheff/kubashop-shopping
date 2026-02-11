@@ -20,6 +20,7 @@ type CartItem = {
   image: string | null;
   custom_slug: string;
   quantity: number;
+  comision_fija: number;
 };
 
 type CartContextType = {
@@ -56,7 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             ...item,
             priceWithMargin:
               item.priceWithMargin ||
-              calculateRoundedPrice(item.price, item.coin),
+              calculateRoundedPrice(item.price, item.coin, item.comision_fija),
             image: item.image || null,
             quantity: item.quantity || 1,
           }));
@@ -135,7 +136,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         {
           ...product,
           quantity: 1,
-          priceWithMargin: calculateRoundedPrice(product.price, product.coin),
+          priceWithMargin: calculateRoundedPrice(
+            product.price,
+            product.coin,
+            product.comision_fija,
+          ),
           image: product.image || null,
         },
       ];

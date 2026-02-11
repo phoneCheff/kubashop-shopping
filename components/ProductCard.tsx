@@ -29,6 +29,7 @@ type ProductCardProps = {
     gender: string | null;
     custom_slug: string;
     link_images: { links: string[] };
+    comision_fija: number;
   };
 };
 
@@ -44,7 +45,7 @@ export const ProductCard = memo(
     // Optimización: memoizar datos derivados
     const allImages = useMemo(
       () => product.link_images?.links || [],
-      [product.link_images?.links]
+      [product.link_images?.links],
     );
     const mainImageUrl = useMemo(() => allImages[0] || null, [allImages]);
 
@@ -56,27 +57,27 @@ export const ProductCard = memo(
           width,
           quality = "auto",
           crop = "fill",
-        }: { width: number; quality?: string; crop?: string }
+        }: { width: number; quality?: string; crop?: string },
       ) => {
         if (!url.includes("cloudinary.com")) return url;
         return url.replace(
           "/upload/",
-          `/upload/q_${quality},c_${crop},w_${width}/`
+          `/upload/q_${quality},c_${crop},w_${width}/`,
         );
       },
-      []
+      [],
     );
 
     // Optimización: memoizar handlers
     const nextImage = useCallback(() => {
       setCurrentImageIndex((prev) =>
-        prev === allImages.length - 1 ? 0 : prev + 1
+        prev === allImages.length - 1 ? 0 : prev + 1,
       );
     }, [allImages.length]);
 
     const prevImage = useCallback(() => {
       setCurrentImageIndex((prev) =>
-        prev === 0 ? allImages.length - 1 : prev - 1
+        prev === 0 ? allImages.length - 1 : prev - 1,
       );
     }, [allImages.length]);
 
@@ -113,14 +114,20 @@ export const ProductCard = memo(
         image: mainImageUrl,
         custom_slug: product.custom_slug,
         quantity: 0,
+        comision_fija: product.comision_fija,
       });
       setIsAdded(true);
     }, [addToCart, product, mainImageUrl]);
 
     // Optimización: memoizar precio calculado
     const calculatedPrice = useMemo(
-      () => calculateRoundedPrice(product.price, product.coin),
-      [product.price, product.coin]
+      () =>
+        calculateRoundedPrice(
+          product.price,
+          product.coin,
+          product.comision_fija,
+        ),
+      [product.price, product.coin, product.comision_fija],
     );
 
     // Optimización: función única para ver detalles
@@ -397,5 +404,5 @@ export const ProductCard = memo(
       prev.product.id === next.product.id &&
       JSON.stringify(prev.product) === JSON.stringify(next.product)
     );
-  }
+  },
 );

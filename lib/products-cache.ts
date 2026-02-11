@@ -31,7 +31,7 @@ export async function getAllActiveProducts(): Promise<ProductType[]> {
             slug
           )
         )
-      `
+      `,
       )
       .eq("is_active", true)
       .order("created_at", { ascending: false });
@@ -58,6 +58,7 @@ export async function getAllActiveProducts(): Promise<ProductType[]> {
           id: lnk.categories?.id,
           slug: lnk.categories?.slug,
         })) || [],
+      comision_fija: product.comision_fija,
     }));
 
     // Actualizar cache
@@ -87,13 +88,13 @@ export async function refreshProductsCache(): Promise<void> {
 export async function getProductsByCategoryPaginated(
   slug: string,
   page: number = 1,
-  perPage: number = 12
+  perPage: number = 12,
 ): Promise<{ products: ProductType[]; totalProducts: number }> {
   const allProducts = await getAllActiveProducts();
 
   // Filtrar por categoría
   const categoryProducts = allProducts.filter((product) =>
-    product.categories?.some((category) => category.slug === slug)
+    product.categories?.some((category) => category.slug === slug),
   );
 
   const totalProducts = categoryProducts.length;
@@ -111,11 +112,11 @@ export async function getProductsByCategoryPaginated(
 
 // Función para obtener TODOS los productos de una categoría (sin paginar)
 export async function getProductsByCategory(
-  slug: string
+  slug: string,
 ): Promise<ProductType[]> {
   const allProducts = await getAllActiveProducts();
   return allProducts.filter((product) =>
-    product.categories?.some((category) => category.slug === slug)
+    product.categories?.some((category) => category.slug === slug),
   );
 }
 
@@ -123,7 +124,7 @@ export async function getProductsByCategory(
 export async function searchProductsPaginated(
   query: string,
   page: number = 1,
-  perPage: number = 12
+  perPage: number = 12,
 ): Promise<{ products: ProductType[]; total: number }> {
   const allProducts = await getAllActiveProducts();
   const normalizedQuery = query.toLowerCase().trim();
@@ -133,7 +134,7 @@ export async function searchProductsPaginated(
   const filteredProducts = allProducts.filter(
     (product) =>
       product.name.toLowerCase().includes(normalizedQuery) ||
-      product.description?.toLowerCase().includes(normalizedQuery)
+      product.description?.toLowerCase().includes(normalizedQuery),
   );
 
   const total = filteredProducts.length;
