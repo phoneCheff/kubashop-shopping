@@ -49,7 +49,7 @@ export function calculateRoundedPrice(
 
   // Límites según moneda
   if (coin === "USD" || coin === "EUR") {
-    if (montoAdicional < 300000) {
+    if (montoAdicional > 10) {
       montoAdicional = 10;
     }
   } else if (coin === "CUP") {
